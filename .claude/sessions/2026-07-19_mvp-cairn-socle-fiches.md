@@ -54,10 +54,38 @@
 - **Mergée sur `main`** (fast-forward `49766f3 → 0dba498`) et **poussée sur `origin/main`**. Branche `feat/ui-shadcn-parchemin` supprimée en local. (Rien à supprimer côté distant : la branche n'avait jamais été poussée, seul `main` l'a été.)
 
 ### Reste à faire (hérité / nouveau)
-- Le perso de test s'appelle désormais **« Aelric le Brave »** (renommé pendant le test navigateur) — toujours à supprimer via le bouton Supprimer de sa fiche.
+- ~~Supprimer le perso de test « Aelric le Brave »~~ — **fait** (absent de la base ; persos actuels : Coltar, Kezac, Lotus, Solveig).
 - Reste inchangé : durcir les secrets, Lot 3 (session live/dés), Lot 4 (prépa MJ), Lot 5 (compendium).
 
 ### Décisions
 - **Intégration shadcn = rethéme parchemin** (option recommandée), pas le look neutre par défaut.
 - shadcn possède les noms `accent`/`muted` → on lui laisse ces utilitaires et on migre le code ; le rouille passe par `primary`, le brun secondaire par `muted-foreground`.
 - Fatigue : on garde les **cases cliquables** (plus lisible qu'un Slider pour du 0–10 discret), juste rethémées.
+
+---
+
+## Passe portraits / avatars + rework accueil (même jour)
+
+### Réalisé
+- **Import d'avatar fiabilisé** (`e532d9c`) : le champ fichier natif faisait un doublon de boutons → composant dédié `PortraitUpload` avec **un seul bouton** (champ caché + auto-submit). **Redimensionnement client** avant envoi (768px max, WebP q.82) qui règle l'erreur « Body exceeded 1 MB limit » des Server Actions ; `serverActions.bodySizeLimit=4mb` en filet. `toast` d'erreur + reset du champ.
+- **Bug infra trouvé en testant** : le bucket Supabase Storage **`portraits` n'existait pas** → l'upload d'avatar n'avait **jamais** marché. Créé (public) via la clé service-role. **⚠ à recréer sur chaque environnement (prod comprise).**
+- **Accueil retravaillé** (`37e2471`) : cards personnage au **format 9:16**, nom en surimpression sur dégradé, état vide soigné. **Le MJ a son propre visuel** : singleton Prisma `Campaign` (id `"main"`, `mjImageUrl`) + migration, `uploadMjPortrait`, `PortraitUpload` généralisé (prop `action`). Visuel MJ sur la bannière accueil + en-tête `/mj`.
+- **Fix bug de largeur** (`37e2471`) : `<body>` repassé de `flex flex-col` → `min-h-full`. Les marges auto de `<main>` (`mx-auto`) désactivaient le stretch flex → `main` s'effondrait à ~414px. Ne « marchait » avant que par accident (texte en flux `truncate/nowrap` des vieilles cards) ; les cards 9:16 (contenu `absolute`) ont révélé le bug.
+- **Portrait par défaut** (`ab937f5` puis `09f2535`) : `public/default-character.webp` (figure encapuchonnée 9:16) affiché sur les cards/fiches/MJ sans image.
+- **Migration `next/image` + tout en WebP** (`09f2535`) : tous les `<img>` bruts → `next/image` (`fill` + `sizes` + `priority`), `remotePatterns` Supabase dans `next.config`, asset par défaut PNG→WebP (1,6 Mo → 33 Ko), upload ré-encode **toujours** en WebP. **Fix middleware** : le matcher n'excluait pas les assets statiques `public/` → l'optimiseur `next/image` (fetch sans cookie) se faisait rediriger vers `/login` (307) → image 400. Extensions d'images exclues du matcher.
+- **Ménage** (`c1666bc`) : SVG par défaut de Next retirés de `public/`.
+- Vérifs vertes à chaque étape : `tsc`, `vitest` 9/9, `next build`, navigateur desktop 1280 + mobile 390 (**0 erreur / 0 warning** console). Tout **poussé sur `origin/main`**.
+
+### Reste à faire
+- **Recréer le bucket `portraits` (public) sur la prod** avant tout usage réel — sinon l'upload d'avatar échoue avec « Bucket not found ».
+- Le **visuel MJ** et l'avatar de **Coltar** ont été mis par Adrien (plus les images de test).
+- Reste inchangé : durcir les secrets, Lot 3 (session live/dés), Lot 4 (prépa MJ), Lot 5 (compendium).
+
+### Blockers
+- Aucun.
+
+### Décisions
+- Cards accueil en **9:16, nom en surimpression** (vs bandeau sous l'image).
+- **Portrait MJ uploadable** (singleton `Campaign`) plutôt que visuel décoratif fixe.
+- **Toujours servir/stocker en WebP** via `next/image` (composant natif) + ré-encodage client à l'upload.
+- Portrait par défaut partagé sur cards, fiche perso et en-tête MJ.
