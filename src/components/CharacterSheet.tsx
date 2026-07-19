@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, Minus, Plus, Trash2 } from "lucide-react";
 import type { Character, Item } from "@prisma/client";
 import { deleteCharacter, updateCharacter } from "@/app/actions/characters";
@@ -173,15 +174,15 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
         {/* En-tête : portrait + nom + épuisé */}
         <section className="flex flex-col sm:flex-row gap-4 sm:items-start">
           <div className="w-28 shrink-0 space-y-2 mx-auto sm:mx-0">
-            <div className="aspect-[9/16] rounded border border-line overflow-hidden bg-[#ddd2b4]">
-              {character.imageUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={character.imageUrl}
-                  alt={character.name}
-                  className="w-full h-full object-cover sepia-[.1]"
-                />
-              )}
+            <div className="relative aspect-[9/16] rounded border border-line overflow-hidden bg-[#ddd2b4]">
+              <Image
+                src={character.imageUrl || "/default-character.webp"}
+                alt={character.name}
+                fill
+                priority
+                sizes="112px"
+                className="object-cover sepia-[.1]"
+              />
             </div>
             <PortraitUpload action={uploadPortrait.bind(null, id)} />
           </div>

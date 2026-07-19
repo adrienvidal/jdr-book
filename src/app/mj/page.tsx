@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import { listCharacters } from "@/app/actions/characters";
 import { getCampaign } from "@/app/actions/campaign";
@@ -29,15 +30,15 @@ export default async function MjPage() {
         </Button>
         <div className="mt-2 flex items-end gap-4">
           <div className="w-24 sm:w-28 shrink-0 space-y-2">
-            <div className="aspect-[9/16] rounded border border-line overflow-hidden bg-[#d9dcc3]">
-              {campaign.mjImageUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={campaign.mjImageUrl}
-                  alt="Meneur de jeu"
-                  className="w-full h-full object-cover sepia-[.1]"
-                />
-              )}
+            <div className="relative aspect-[9/16] rounded border border-line overflow-hidden bg-[#d9dcc3]">
+              <Image
+                src={campaign.mjImageUrl || "/default-character.webp"}
+                alt="Meneur de jeu"
+                fill
+                priority
+                sizes="112px"
+                className="object-cover sepia-[.1]"
+              />
             </div>
             <PortraitUpload action={uploadMjPortrait} />
           </div>

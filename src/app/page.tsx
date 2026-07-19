@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronRight, Plus, Shield, UserPlus } from "lucide-react";
 import { listCharacters } from "@/app/actions/characters";
 import { getCampaign } from "@/app/actions/campaign";
@@ -45,11 +46,13 @@ export default async function Home() {
               href={`/character/${c.id}`}
               className="group relative aspect-[9/16] rounded-lg border border-line bg-[#ddd2b4] overflow-hidden shadow-sm hover:shadow-md hover:border-primary transition-all focus-visible:border-primary"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={c.imageUrl || "/default-character.png"}
+              <Image
+                src={c.imageUrl || "/default-character.webp"}
                 alt={c.name}
-                className="absolute inset-0 w-full h-full object-cover sepia-[.12] group-hover:sepia-0 transition-[filter]"
+                fill
+                priority
+                sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                className="object-cover sepia-[.12] group-hover:sepia-0 transition-[filter]"
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent px-3 pb-2.5 pt-10">
                 <span className="block text-center font-cairn text-lg sm:text-xl text-parch truncate drop-shadow-sm">
@@ -68,11 +71,13 @@ export default async function Home() {
         >
           <div className="relative w-20 sm:w-24 shrink-0 aspect-[9/16] bg-[#d9dcc3] overflow-hidden">
             {campaign.mjImageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={campaign.mjImageUrl}
                 alt="Meneur de jeu"
-                className="absolute inset-0 w-full h-full object-cover sepia-[.12] group-hover:sepia-0 transition-[filter]"
+                fill
+                priority
+                sizes="96px"
+                className="object-cover sepia-[.12] group-hover:sepia-0 transition-[filter]"
               />
             ) : (
               <div className="flex h-full items-center justify-center">

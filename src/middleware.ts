@@ -19,5 +19,10 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // Exclut les internes Next et les assets statiques du dossier public (sinon
+  // l'optimiseur next/image, qui va chercher l'image sans cookie d'auth, se fait
+  // rediriger vers /login → image invalide).
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico)$).*)",
+  ],
 };

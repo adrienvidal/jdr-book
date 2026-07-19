@@ -14,7 +14,8 @@ async function downscale(file: File): Promise<File> {
   if (!/^image\/(jpe?g|png|webp)$/i.test(file.type)) return file;
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, MAX_DIM / Math.max(bitmap.width, bitmap.height));
-  if (scale === 1 && file.size < 1_000_000) return file; // déjà petit
+  // Déjà petit ET déjà en WebP → rien à faire. Sinon on ré-encode toujours en WebP.
+  if (scale === 1 && /webp/i.test(file.type) && file.size < 1_000_000) return file;
   const w = Math.round(bitmap.width * scale);
   const h = Math.round(bitmap.height * scale);
   const canvas = document.createElement("canvas");
