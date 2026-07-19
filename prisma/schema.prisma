@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Character {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  imageUrl  String?
+  passe     String   @default("")
+  force     Int      @default(10)
+  forceMax  Int      @default(10)
+  dex       Int      @default(10)
+  dexMax    Int      @default(10)
+  vol       Int      @default(10)
+  volMax    Int      @default(10)
+  pv        Int      @default(1)
+  pvMax     Int      @default(1)
+  armure    Int      @default(0)
+  sous      Int      @default(0)
+  epuise    Boolean  @default(false)
+  fatigue   Int      @default(0)
+  traits    String   @default("")
+  liens     String   @default("")
+  presages  String   @default("")
+  notes     String   @default("")
+  items     Item[]
+}
+
+model Item {
+  id          String    @id @default(cuid())
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  characterId String
+  name        String
+  slots       Int       @default(1)
+  kind        String    @default("equipement")
+  degats      String?
+  armorValue  Int?
+  uses        Int?
+  description String    @default("")
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  title     String   @default("")
+  content   String   @default("")
+  updatedAt DateTime @updatedAt
+}
