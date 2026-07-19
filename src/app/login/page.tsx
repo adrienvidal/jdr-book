@@ -8,9 +8,10 @@ export default async function LoginPage({
   const { error } = await searchParams;
   return (
     <main className="min-h-screen grid place-items-center p-6">
-      <form action={loginApp} className="w-full max-w-sm space-y-4">
-        <h1 className="text-2xl font-semibold">Cairn — Accès</h1>
-        {error && <p className="text-red-500 text-sm">Mot de passe incorrect.</p>}
+      <form action={loginApp} className="w-full max-w-sm space-y-4 rounded-xl border-2 border-line bg-panel/60 p-8 shadow-sm">
+        <h1 className="font-cairn text-5xl text-accent text-center leading-none">Cairn</h1>
+        <p className="text-center text-muted text-sm -mt-2">Entrez pour rejoindre la table</p>
+        {error && <p className="text-accent text-sm">Mot de passe incorrect.</p>}
         <input
           name="password"
           type="password"
@@ -19,7 +20,7 @@ export default async function LoginPage({
           suppressHydrationWarning
           className="w-full rounded border px-3 py-2 bg-transparent"
         />
-        <button className="w-full rounded bg-emerald-700 text-white py-2">Entrer</button>
+        <button className="w-full rounded bg-accent text-accent-fg py-2 hover:opacity-90">Entrer</button>
       </form>
     </main>
   );

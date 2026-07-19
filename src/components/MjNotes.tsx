@@ -2,33 +2,33 @@
 import type { Note } from "@prisma/client";
 import { createNote, deleteNote, updateNote } from "@/app/actions/notes";
 
-const cls = "rounded border px-2 py-1 bg-transparent";
+const cls = "rounded border border-line bg-panel px-2 py-1";
 
 export function MjNotes({ notes }: { notes: Note[] }) {
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Notes secrètes</h2>
+        <h2 className="font-cairn text-2xl text-moss">Notes secrètes</h2>
         <button
           onClick={() => createNote()}
-          className="rounded bg-amber-700 text-white px-3 py-1 text-sm"
+          className="rounded bg-moss text-accent-fg px-3 py-1 text-sm hover:opacity-90"
         >
           + Nouvelle note
         </button>
       </div>
-      {notes.length === 0 && <p className="text-sm text-neutral-500">Aucune note.</p>}
+      {notes.length === 0 && <p className="text-sm text-muted">Aucune note.</p>}
       {notes.map((n) => (
-        <div key={n.id} className="rounded border p-3 space-y-2">
+        <div key={n.id} className="rounded-lg border border-line bg-panel/60 p-3 space-y-2">
           <div className="flex items-center gap-2">
             <input
               defaultValue={n.title}
               onBlur={(e) => updateNote(n.id, { title: e.target.value })}
               placeholder="Titre"
-              className={`${cls} flex-1 font-semibold`}
+              className={`${cls} flex-1 font-cairn text-lg`}
             />
             <button
               onClick={() => deleteNote(n.id)}
-              className="text-red-500 underline text-sm"
+              className="text-accent hover:opacity-80 text-sm"
               aria-label="Supprimer la note"
             >
               ✕

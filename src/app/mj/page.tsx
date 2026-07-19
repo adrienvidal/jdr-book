@@ -8,19 +8,19 @@ export default async function MjPage() {
   const [characters, notes] = await Promise.all([listCharacters(), listNotes()]);
   return (
     <main className="min-h-screen p-6 max-w-5xl mx-auto space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-semibold">Interface MJ</h1>
-        <Link href="/" className="text-sm underline">
+      <div className="border-b border-line pb-4">
+        <Link href="/" className="text-sm text-muted hover:text-accent underline">
           ← Accueil
         </Link>
+        <h1 className="font-cairn text-5xl text-moss leading-none mt-2">Interface MJ</h1>
       </div>
 
       <section>
-        <h2 className="text-xl font-semibold mb-3">Personnages</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm border-collapse">
+        <h2 className="font-cairn text-2xl mb-3">Personnages</h2>
+        <div className="overflow-x-auto rounded-lg border border-line bg-panel/60">
+          <table className="w-full text-sm border-collapse [&_th]:px-3 [&_td]:px-3 [&_th:first-child]:pl-4 [&_td:first-child]:pl-4 [&_th:last-child]:pr-4 [&_td:last-child]:pr-4">
             <thead>
-              <tr className="text-left border-b">
+              <tr className="text-left border-b border-line text-muted">
                 <th className="py-2">Nom</th>
                 <th>PV</th>
                 <th>FOR</th>

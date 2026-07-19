@@ -10,7 +10,7 @@ import {
 } from "@/lib/inventory";
 
 const KINDS = ["arme", "armure", "equipement", "grimoire"];
-const cls = "rounded border px-2 py-1 bg-transparent";
+const cls = "rounded border border-line bg-panel px-2 py-1";
 
 function ItemRow({ item }: { item: Item }) {
   return (
@@ -55,7 +55,7 @@ function ItemRow({ item }: { item: Item }) {
       />
       <button
         onClick={() => deleteItem(item.id)}
-        className="text-red-500 underline"
+        className="text-accent hover:opacity-80"
         aria-label="Supprimer l'objet"
       >
         ✕
@@ -93,7 +93,7 @@ function AddItemForm({ characterId }: { characterId: string }) {
           </option>
         ))}
       </select>
-      <button className="rounded bg-emerald-700 text-white px-3 py-1">Ajouter</button>
+      <button className="rounded bg-accent text-accent-fg px-3 py-1 hover:opacity-90">Ajouter</button>
     </form>
   );
 }
@@ -113,26 +113,30 @@ export function InventoryEditor({
   const slotted = slottedItems(items);
 
   return (
-    <section className="rounded border p-4 space-y-2">
+    <section className="rounded-lg border border-line bg-panel/60 p-4 space-y-2">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Inventaire</h2>
-        <span className={`text-sm ${over ? "text-red-500 font-semibold" : "text-neutral-500"}`}>
+        <h2 className="font-cairn text-xl">Inventaire</h2>
+        <span className={`text-sm ${over ? "text-accent font-semibold" : "text-muted"}`}>
           {used} / {MAX_SLOTS} slots{fatigue > 0 ? ` (dont ${fatigue} fatigue)` : ""}
           {over ? " — surchargé !" : ""}
         </span>
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold text-neutral-500 mt-2">Inventaire (1-10)</h3>
-        {slotted.length === 0 && <p className="text-sm text-neutral-500">Vide.</p>}
+        <h3 className="text-xs uppercase tracking-wider font-semibold text-muted mt-2">
+          Inventaire (1-10)
+        </h3>
+        {slotted.length === 0 && <p className="text-sm text-muted">Vide.</p>}
         {slotted.map((item) => (
           <ItemRow key={item.id} item={item} />
         ))}
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold text-neutral-500 mt-2">Petits Objets</h3>
-        {petty.length === 0 && <p className="text-sm text-neutral-500">Vide.</p>}
+        <h3 className="text-xs uppercase tracking-wider font-semibold text-muted mt-2">
+          Petits Objets
+        </h3>
+        {petty.length === 0 && <p className="text-sm text-muted">Vide.</p>}
         {petty.map((item) => (
           <ItemRow key={item.id} item={item} />
         ))}
