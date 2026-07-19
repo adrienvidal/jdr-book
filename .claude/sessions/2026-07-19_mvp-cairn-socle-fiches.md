@@ -89,3 +89,30 @@
 - **Portrait MJ uploadable** (singleton `Campaign`) plutôt que visuel décoratif fixe.
 - **Toujours servir/stocker en WebP** via `next/image` (composant natif) + ré-encodage client à l'upload.
 - Portrait par défaut partagé sur cards, fiche perso et en-tête MJ.
+
+---
+
+## Passe UI hero + fiches + page MJ (même jour, skill impeccable)
+
+### Réalisé
+- **Auth MJ désactivée temporairement** (`3e3e581`) : bloc de vérif du mot de passe MJ **commenté** dans `src/middleware.ts` avec `TODO(à remettre)`. `/mj` reste protégé par l'auth d'app. **⚠ à réactiver plus tard** (décommenter le bloc).
+- **Accueil — card MJ format personnage** (`1074d52`) : sections titrées « Personnages » / « Meneur de jeu » (composant `SectionHeading` + trait moss). La card MJ prend le gabarit 9:16 des cards perso mais garde son identité (liseré/ring moss, badge bouclier, overlay teinté vert). Ancienne bannière horizontale retirée.
+- **Fiche perso — bouton import + portrait mobile** (`8e28789`) : gros bouton beige → **bouton overlay « appareil photo »** en coin de la photo (`PortraitUpload` rendu flexible : `label`/`variant`/`size`/`className`). Portrait mobile agrandi.
+- **Fiche perso — hero plein écran façon Steam** (`8e28789`) : en-tête transformé en hero **bord à bord** (breakout `w-screen` + `overflow-x:hidden` sur `body`). Fond = **même image adoucie** (`blur-md`, pas trop floue pour rester lisible), portrait net centré, **nom en surimpression** (kicker « Cairn ») sur dégradé bas, barre Accueil/Supprimer sur scrim, bouton photo overlay. Corps de la fiche sous le hero. Textes du hero agrandis sur desktop (`5bfd718` : nom `lg:text-6xl`, kicker, boutons).
+- **Fiche perso — blocs regroupés + Épuisé** (`5bfd718`) : suppression de la carte englobante (fin des **cartes imbriquées**) → blocs = cartes sœurs sur parchemin. Stats chiffrées réunies dans une carte **« Caractéristiques »** (attributs + séparateur + Armure/Sous). **Épuisé** repositionné : case à cocher → **toggle de statut** proéminent, rouge (destructive) quand actif (état React contrôlé). Espacement Armure/Sous corrigé ensuite (`56d027f` : label+input regroupés/centrés, plus de `justify-between`).
+- **Page MJ améliorée** (`6478ed6` puis `56d027f`) : en-tête d'abord compacté (résumé campagne, bouton photo overlay), **puis transformé en hero plein écran comme la fiche perso** (fond flou, portrait centré, identité « Meneur de jeu » + titre + résumé en surimpression). **Table des personnages enrichie** : vignettes de portrait par ligne, survol de ligne, ligne teintée si épuisé, colonne « État ». Titres de section unifiés (« Personnages »/« Notes secrètes »).
+- Vérifs vertes à chaque étape (`tsc`, `next build`, navigateur desktop+mobile, 0 erreur console). Tout **poussé sur `origin/main`**.
+
+### Reste à faire
+- **⚠ Réactiver l'authentification MJ** (`src/middleware.ts`, bloc commenté `TODO(à remettre)`) quand la phase de test/démo sera finie.
+- **Recréer le bucket `portraits` (public) sur la prod** (inchangé).
+- Reste inchangé : durcir les secrets, Lot 3 (session live/dés), Lot 4 (prépa MJ), Lot 5 (compendium).
+
+### Blockers
+- Aucun.
+
+### Décisions
+- **Hero plein écran façon Steam** partagé fiche perso + page MJ (breakout `w-screen`, fond flou lisible, nom/identité en surimpression). Identité MJ portée par le bouclier + « Meneur de jeu », sinon même traitement.
+- Fond du hero : **flou léger** (`blur-md`), on doit reconnaître l'image, pas un simple fond d'ambiance.
+- **Épuisé = toggle rouge** (cohérent avec le badge du dashboard MJ), pas une case à cocher.
+- **Pas de cartes imbriquées** sur la fiche : blocs = cartes sœurs, stats regroupées.
