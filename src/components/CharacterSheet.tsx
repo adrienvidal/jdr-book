@@ -11,12 +11,13 @@ import { InventoryEditor } from "@/components/InventoryEditor";
 import { PortraitUpload } from "@/components/PortraitUpload";
 import { MAX_SLOTS } from "@/lib/inventory";
 import { useFieldSave } from "@/lib/use-field-save";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -95,6 +96,7 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
   const router = useRouter();
   const id = character.id;
   const [fatigue, setFatigue] = useState(character.fatigue);
+  const [epuise, setEpuise] = useState(character.epuise);
 
   const save = useFieldSave({
     name: character.name,
@@ -124,6 +126,12 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
     const v = Math.max(0, Math.min(MAX_SLOTS, n));
     setFatigue(v);
     saveField("fatigue", v);
+  }
+
+  function toggleEpuise() {
+    const v = !epuise;
+    setEpuise(v);
+    saveField("epuise", v);
   }
 
   async function onDelete() {
@@ -172,8 +180,8 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
             <Button
               asChild
               variant="ghost"
-              size="sm"
-              className="text-parch hover:bg-white/10 hover:text-white"
+              size="default"
+              className="text-parch hover:bg-white/10 hover:text-white sm:text-base [&_svg]:sm:size-5"
             >
               <Link href="/">
                 <ArrowLeft /> Accueil
@@ -182,7 +190,11 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
+                <Button
+                  variant="destructive"
+                  size="default"
+                  className="sm:text-base [&_svg]:sm:size-5"
+                >
                   <Trash2 /> Supprimer
                 </Button>
               </AlertDialogTrigger>
@@ -207,7 +219,7 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/45 to-transparent pt-20">
           <div className="mx-auto flex max-w-4xl items-end justify-between gap-3 px-4 py-4 sm:px-6 sm:py-6">
             <div className="min-w-0 flex-1">
-              <span className="mb-1 block text-xs font-medium uppercase tracking-wider text-parch/60">
+              <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-parch/70 sm:text-sm">
                 Cairn
               </span>
               <Input
@@ -215,7 +227,7 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
                 onBlur={(e) => saveField("name", e.target.value)}
                 placeholder="Nom du personnage"
                 aria-label="Nom du personnage"
-                className="h-auto border-0 bg-transparent px-0 py-0 font-cairn text-3xl text-parch shadow-none drop-shadow-lg placeholder:text-parch/50 focus-visible:ring-0 sm:text-4xl"
+                className="h-auto border-0 bg-transparent px-0 py-0 font-cairn text-3xl text-parch shadow-none drop-shadow-lg placeholder:text-parch/50 focus-visible:ring-0 sm:text-5xl lg:text-6xl"
               />
             </div>
             <PortraitUpload
@@ -229,18 +241,61 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
       </div>
 
       {/* Feuille */}
-      <article className="mt-4 space-y-5 rounded-xl border-2 border-line bg-card/50 p-4 shadow-sm sm:mt-6 sm:space-y-6 sm:p-6">
-        {/* État + Armure / Sous */}
-        <section className="flex flex-wrap items-center gap-4">
-          <label className="flex w-fit cursor-pointer items-center gap-2 text-sm">
-            <Checkbox
-              defaultChecked={character.epuise}
-              onCheckedChange={(v) => saveField("epuise", v === true)}
-            />
-            Épuisé·e
-          </label>
-          <div className="grid min-w-[16rem] flex-1 grid-cols-2 gap-3">
-            <label className="flex items-center justify-between gap-2 rounded-lg border border-line bg-card/70 p-3">
+      <div className="mt-6 space-y-6 sm:mt-8 sm:space-y-8">
+        {/* Statut : Épuisé (condition Cairn) — toggle proéminent */}
+        <button
+          type="button"
+          role="switch"
+          aria-checked={epuise}
+          onClick={toggleEpuise}
+          className={cn(
+            "flex w-full items-center justify-between gap-4 rounded-lg border px-4 py-3 transition-colors sm:w-auto",
+            epuise
+              ? "border-destructive/60 bg-destructive/10 text-destructive"
+              : "border-line bg-card/70 hover:border-primary/50",
+          )}
+        >
+          <span className="font-cairn text-lg leading-none">Épuisé·e</span>
+          <span
+            className={cn(
+              "rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide",
+              epuise ? "bg-destructive/20 text-destructive" : "bg-muted text-muted-foreground",
+            )}
+          >
+            {epuise ? "Oui" : "Non"}
+          </span>
+        </button>
+
+        {/* Caractéristiques : attributs + Armure / Sous, regroupés */}
+        <Card className="p-3 sm:p-4 gap-0">
+          <span className="mb-3 block font-cairn text-lg">Caractéristiques</span>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-4 sm:grid-cols-4">
+            {attributs.map(([label, field, cur, max]) => (
+              <div key={field} className="text-center">
+                <div className="font-cairn text-base">{label}</div>
+                <div className="mt-1 flex items-center justify-center gap-1">
+                  <Input
+                    type="number"
+                    defaultValue={cur}
+                    onBlur={(e) => saveField(field, Number(e.target.value))}
+                    aria-label={`${label} actuel`}
+                    className="w-14 px-1 text-center tabular-nums"
+                  />
+                  <span className="text-muted-foreground">/</span>
+                  <Input
+                    type="number"
+                    defaultValue={max}
+                    onBlur={(e) => saveField(`${field}Max`, Number(e.target.value))}
+                    aria-label={`${label} max`}
+                    className="w-14 px-1 text-center tabular-nums"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+          <Separator className="my-4" />
+          <div className="grid grid-cols-2 gap-4">
+            <label className="flex items-center justify-between gap-2">
               <span className="font-cairn">Armure</span>
               <Input
                 type="number"
@@ -249,7 +304,7 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
                 className="w-16 text-center tabular-nums"
               />
             </label>
-            <label className="flex items-center justify-between gap-2 rounded-lg border border-line bg-card/70 p-3">
+            <label className="flex items-center justify-between gap-2">
               <span className="font-cairn">Sous</span>
               <Input
                 type="number"
@@ -259,33 +314,7 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
               />
             </label>
           </div>
-        </section>
-
-        {/* Attributs */}
-        <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {attributs.map(([label, field, cur, max]) => (
-            <div key={field} className="rounded-lg border border-line bg-card/70 p-3 text-center">
-              <div className="font-cairn text-lg">{label}</div>
-              <div className="flex items-center justify-center gap-1 mt-1">
-                <Input
-                  type="number"
-                  defaultValue={cur}
-                  onBlur={(e) => saveField(field, Number(e.target.value))}
-                  aria-label={`${label} actuel`}
-                  className="w-14 text-center tabular-nums px-1"
-                />
-                <span className="text-muted-foreground">/</span>
-                <Input
-                  type="number"
-                  defaultValue={max}
-                  onBlur={(e) => saveField(`${field}Max`, Number(e.target.value))}
-                  aria-label={`${label} max`}
-                  className="w-14 text-center tabular-nums px-1"
-                />
-              </div>
-            </div>
-          ))}
-        </section>
+        </Card>
 
         {/* Fatigue */}
         <FatigueBar fatigue={fatigue} onChange={changeFatigue} />
@@ -317,7 +346,7 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
             </div>
           ))}
         </section>
-      </article>
+      </div>
     </main>
   );
 }
