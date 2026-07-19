@@ -51,11 +51,10 @@
 - **Modals de confirmation `AlertDialog`** sur toutes les actions destructives : suppression perso, objet d'inventaire, note MJ. Anti-friction : suppression directe si l'élément est encore vide.
 - **Feedback de sauvegarde** : `useFieldSave` (autosave onBlur dédupliqué + toast `sonner` discret). Badge d'alerte de surcharge d'inventaire. `SubmitButton` avec état `pending`.
 - Vérifs vertes : `tsc`, `vitest` (9/9), `next build`, navigateur desktop+mobile (0 erreur console). Code mort retiré (`ui/dialog.tsx` non utilisé).
-- Travail sur la branche **`feat/ui-shadcn-parchemin`** (commits `0cf2db8` + finitions). **Pas encore mergée sur `main`** (intégration laissée à valider).
+- **Mergée sur `main`** (fast-forward `49766f3 → 0dba498`) et **poussée sur `origin/main`**. Branche `feat/ui-shadcn-parchemin` supprimée en local. (Rien à supprimer côté distant : la branche n'avait jamais été poussée, seul `main` l'a été.)
 
 ### Reste à faire (hérité / nouveau)
-- **Merger `feat/ui-shadcn-parchemin` sur `main`** puis supprimer la branche (workflow habituel), quand validé.
-- Le perso de test s'appelle désormais **« Aelric le Brave »** (renommé pendant le test navigateur) — toujours à supprimer.
+- Le perso de test s'appelle désormais **« Aelric le Brave »** (renommé pendant le test navigateur) — toujours à supprimer via le bouton Supprimer de sa fiche.
 - Reste inchangé : durcir les secrets, Lot 3 (session live/dés), Lot 4 (prépa MJ), Lot 5 (compendium).
 
 ### Décisions
