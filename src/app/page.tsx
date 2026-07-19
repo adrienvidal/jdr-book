@@ -1,12 +1,16 @@
-import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import { cookies } from "next/headers";
+import { cookieName, verifySession } from "@/lib/auth";
+import { LandingStart } from "@/components/LandingStart";
 
 // Landing publique — écran de démarrage façon jeu vidéo.
-// Composant serveur statique : aucune donnée, aucun cookie (route publique).
-// « Commencer » mène à /table ; le middleware gère l'entrée directe (cookie
-// valide) ou la demande de mot de passe.
-export default function Landing() {
+// Route publique. On lit le cookie de session juste pour personnaliser le
+// bouton « Commencer » : connecté → entrée directe vers /table ; sinon → la
+// modale de mot de passe s'ouvre sur place (voir LandingStart).
+export default async function Landing() {
+  const jar = await cookies();
+  const authed = await verifySession(jar.get(cookieName("app"))?.value, "app");
+
   return (
     <main className="relative min-h-dvh overflow-hidden">
       {/* Fond cinématique */}
@@ -33,9 +37,7 @@ export default function Landing() {
         </p>
 
         <div className="animate-in fade-in slide-in-from-bottom-2 delay-300 fill-mode-backwards duration-700 mt-auto">
-          <Button asChild size="lg" className="px-10 py-6 text-lg shadow-xl shadow-black/40">
-            <Link href="/table">Commencer</Link>
-          </Button>
+          <LandingStart authed={authed} />
         </div>
       </div>
     </main>
