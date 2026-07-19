@@ -142,3 +142,34 @@ Spec : `docs/superpowers/specs/2026-07-19-landing-publique-commencer-design.md`.
 ### Maj — fond de la landing (fait)
 - ✅ **Image de fond dédiée en place** (`fbd2435`) : `docs/landing1.png` (table de JDR : grimoire, carte, dés, plume) → `public/landing.webp` (2 Mo → 108 Ko via sharp). Cadrage `object-center`, overlay adouci pour garder l'ambiance chaude. Vérifié desktop + mobile. → le « Reste à faire : image de fond dédiée » est clos.
 - Sources PNG de la landing ignorées dans git (`.gitignore : /docs/landing*.png`), gardées en local ; WebP versionné.
+
+---
+
+## Landing — finitions, login modale, metadata (même jour, suite)
+
+Spec landing : `docs/superpowers/specs/2026-07-19-landing-publique-commencer-design.md`. Tout poussé sur `origin/main` (dernier commit `0eb0e53`).
+
+### Réalisé
+- **Placement titre/bouton** (`6be19d0`, `8666c93`) : titre remonté dans la zone de bois libre de l'image (`pt-[19vh]`), bouton **Commencer** ancré en bas via `mt-auto` + `pb-[11vh]` (grammaire d'écran de démarrage : titre haut / CTA bas).
+- **Sous-titre** (`9ca2362`) : « Compagnon de campagne » → **« Carnet de campagne »** (rendu `UPPERCASE` lettré).
+- **Login en modale sur la landing** (`c339a3a`) : *Commencer* ouvre une modale mot de passe **sans quitter la landing** (fond assombri + flouté). Déjà connecté → *Commencer* = lien direct `/table`. Erreur affichée **inline** via `useActionState` (`loginAppAction`, succès → `/table`, échec → `{error:true}`). Nouveau `components/ui/dialog.tsx` (Radix) + client `LandingStart.tsx`. La landing lit le cookie côté serveur (page passée en dynamique).
+- **`/login` → landing + modale** (`ad1ba80`) : middleware et page `/login` redirigent vers `/?login=1` ; la landing ouvre la modale d'emblée sur ce param (`openLogin` → `defaultOpen`). `/login` n'est plus qu'une redirection (filet deep links). `loginApp` (devenu inutilisé) retiré.
+- **Metadata optimisées** (`9c0e0a6`) : title template `%s · Cairn` + titres par page (La table, Meneur de jeu, Nouveau personnage, nom du perso via `generateMetadata`) ; description « Carnet de campagne » ; `metadataBase` (env `NEXT_PUBLIC_SITE_URL` → Vercel → localhost) ; **Open Graph + Twitter** complets ; `robots: noindex` (app privée) ; `viewport` themeColor `#e8e1cd` + `colorScheme: light` ; `appleWebApp`. **Image de partage générée** `opengraph-image.tsx` (1200×630), route rendue publique dans le middleware.
+- **Police de marque sur l'image OG** (`be30b63`) : TTF **Pirata One** co-localisé (`src/app/PirataOne-Regular.ttf`), lu via `fs` (le `fetch` de `file://` casse au prerender). Titre + sous-titre de la carte en gothique.
+- **Image desktop dédiée** (`0eb0e53`) : `landing-desk.png` (paysage) → `public/landing-desk.webp` (109 Ko). **Art direction responsive** via `<picture>` + `media` : paysage desktop / portrait mobile, une seule image téléchargée par viewport (remplace 2 `next/image`, warning console éliminé).
+- Vérifs : `next build` vert, 9 tests vitest verts, rendus vérifiés desktop + mobile au navigateur (modale, erreur inline, succès, deep links, OG image).
+
+### Reste à faire
+- **Définir `NEXT_PUBLIC_SITE_URL`** sur l'hébergeur pour des liens OG absolus (sinon repli URL Vercel).
+- Optionnel : **manifest PWA + icônes** (192/512) pour un vrai « installer l'app » (icônes à générer d'abord).
+- Toujours ouvert (hérité) : réactiver l'auth MJ (`middleware.ts`, bloc `TODO(à remettre)`) ; recréer le bucket `portraits` (public) en prod ; durcir les secrets.
+
+### Blockers
+- Aucun.
+
+### Décisions
+- **`/` = landing publique** ; dashboard sur **`/table`** (protégé). *Commencer* = lien `/table`, le middleware gère entrée directe (cookie) vs mot de passe.
+- **Login = modale sur la landing** (pas de page nue) ; `/login` conservé uniquement comme redirection filet. Erreur gérée inline (`useActionState`), pas de redirection.
+- **App privée → `noindex`** assumé (facile à inverser).
+- **Art direction responsive** en `<picture>` plutôt que 2 `next/image` (évite le double téléchargement).
+- Sources PNG des images de landing **ignorées** dans git (`/docs/landing*.png`), seul le WebP est versionné.
