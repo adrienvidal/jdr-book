@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, Plus, Shield, UserPlus, UserRound } from "lucide-react";
+import { ChevronRight, Plus, Shield, UserPlus } from "lucide-react";
 import { listCharacters } from "@/app/actions/characters";
 import { getCampaign } from "@/app/actions/campaign";
 import { Button } from "@/components/ui/button";
@@ -45,18 +45,12 @@ export default async function Home() {
               href={`/character/${c.id}`}
               className="group relative aspect-[9/16] rounded-lg border border-line bg-[#ddd2b4] overflow-hidden shadow-sm hover:shadow-md hover:border-primary transition-all focus-visible:border-primary"
             >
-              {c.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={c.imageUrl}
-                  alt={c.name}
-                  className="absolute inset-0 w-full h-full object-cover sepia-[.12] group-hover:sepia-0 transition-[filter]"
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <UserRound className="size-10 text-line" strokeWidth={1.5} />
-                </div>
-              )}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={c.imageUrl || "/default-character.png"}
+                alt={c.name}
+                className="absolute inset-0 w-full h-full object-cover sepia-[.12] group-hover:sepia-0 transition-[filter]"
+              />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent px-3 pb-2.5 pt-10">
                 <span className="block text-center font-cairn text-lg sm:text-xl text-parch truncate drop-shadow-sm">
                   {c.name || "Sans nom"}
