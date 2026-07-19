@@ -33,9 +33,21 @@ async function downscale(file: File): Promise<File> {
 
 export function PortraitUpload({
   action,
+  label = "Importer une image",
+  pendingLabel = "Import…",
+  variant = "secondary",
+  size = "lg",
+  className = "w-full h-8",
 }: {
   action: (formData: FormData) => Promise<void>;
+  /** Texte du bouton ; `null` → bouton icône seule (overlay). */
+  label?: string | null;
+  pendingLabel?: string;
+  variant?: React.ComponentProps<typeof Button>["variant"];
+  size?: React.ComponentProps<typeof Button>["size"];
+  className?: string;
 }) {
+  const iconOnly = label === null;
   const inputRef = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState(false);
 
@@ -68,14 +80,16 @@ export function PortraitUpload({
       />
       <Button
         type="button"
-        variant="secondary"
-        size="lg"
+        variant={variant}
+        size={size}
         disabled={pending}
         onClick={() => inputRef.current?.click()}
-        className="w-full h-8"
+        className={className}
+        aria-label={iconOnly ? "Importer une image" : undefined}
+        title={iconOnly ? "Importer une image" : undefined}
       >
         {pending ? <Loader2 className="animate-spin" /> : <ImagePlus />}
-        {pending ? "Import…" : "Importer une image"}
+        {!iconOnly && <span>{pending ? pendingLabel : label}</span>}
       </Button>
     </>
   );

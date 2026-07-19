@@ -61,6 +61,7 @@
 @layer base {
   body {
     min-height: 100vh;
+    overflow-x: hidden; /* les hero plein écran débordent via un breakout w-screen */
     background-color: var(--color-parch);
     background-image:
       radial-gradient(120% 90% at 50% -10%, rgba(255, 251, 235, 0.6), transparent 60%),

@@ -139,91 +139,125 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
   ];
 
   return (
-    <main className="min-h-screen p-4 sm:p-6 max-w-4xl mx-auto space-y-4 sm:space-y-6">
-      <div className="flex items-center justify-between">
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/">
-            <ArrowLeft /> Accueil
-          </Link>
-        </Button>
+    <main className="mx-auto min-h-screen max-w-4xl px-4 pb-8 sm:px-6">
+      {/* Hero plein écran (breakout) : portrait net + fond flouté, nom en surimpression */}
+      <div className="relative left-1/2 right-1/2 -mx-[50vw] h-[26rem] w-screen overflow-hidden bg-ink sm:h-[30rem]">
+        {/* Fond flouté qui remplit les bords (le portrait est vertical) */}
+        <Image
+          src={character.imageUrl || "/default-character.webp"}
+          alt=""
+          aria-hidden
+          fill
+          priority
+          sizes="100vw"
+          className="scale-110 object-cover opacity-80 blur-2xl"
+        />
+        <div className="absolute inset-0 bg-black/25" />
 
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm">
-              <Trash2 /> Supprimer
+        {/* Portrait net, non rogné, centré */}
+        <div className="absolute inset-y-0 left-1/2 aspect-[9/16] -translate-x-1/2">
+          <Image
+            src={character.imageUrl || "/default-character.webp"}
+            alt={character.name}
+            fill
+            priority
+            sizes="(max-width: 640px) 60vw, 300px"
+            className="object-cover sepia-[.08]"
+          />
+        </div>
+
+        {/* Barre du haut : Accueil / Supprimer */}
+        <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-black/55 to-transparent">
+          <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3 sm:px-6">
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="text-parch hover:bg-white/10 hover:text-white"
+            >
+              <Link href="/">
+                <ArrowLeft /> Accueil
+              </Link>
             </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Supprimer ce personnage ?</AlertDialogTitle>
-              <AlertDialogDescription>
-                « {character.name || "Sans nom"} » et tout son inventaire seront définitivement
-                perdus. Cette action est irréversible.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Annuler</AlertDialogCancel>
-              <AlertDialogAction onClick={onDelete}>Supprimer définitivement</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm">
+                  <Trash2 /> Supprimer
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Supprimer ce personnage ?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    « {character.name || "Sans nom"} » et tout son inventaire seront définitivement
+                    perdus. Cette action est irréversible.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction onClick={onDelete}>Supprimer définitivement</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
+
+        {/* Dégradé bas : nom en surimpression (façon Steam) + bouton photo */}
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/45 to-transparent pt-20">
+          <div className="mx-auto flex max-w-4xl items-end justify-between gap-3 px-4 py-4 sm:px-6 sm:py-6">
+            <div className="min-w-0 flex-1">
+              <span className="mb-1 block text-xs font-medium uppercase tracking-wider text-parch/60">
+                Cairn
+              </span>
+              <Input
+                defaultValue={character.name}
+                onBlur={(e) => saveField("name", e.target.value)}
+                placeholder="Nom du personnage"
+                aria-label="Nom du personnage"
+                className="h-auto border-0 bg-transparent px-0 py-0 font-cairn text-3xl text-parch shadow-none drop-shadow-lg placeholder:text-parch/50 focus-visible:ring-0 sm:text-4xl"
+              />
+            </div>
+            <PortraitUpload
+              action={uploadPortrait.bind(null, id)}
+              label={null}
+              size="icon"
+              className="size-10 shrink-0 rounded-full border-0 bg-ink/60 text-parch shadow-md backdrop-blur-sm hover:bg-ink/80"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Feuille */}
-      <article className="rounded-xl border-2 border-line bg-card/50 shadow-sm p-4 sm:p-6 space-y-5 sm:space-y-6">
-        {/* En-tête : portrait + nom + épuisé */}
-        <section className="flex flex-col sm:flex-row gap-4 sm:items-start">
-          <div className="w-28 shrink-0 space-y-2 mx-auto sm:mx-0">
-            <div className="relative aspect-[9/16] rounded border border-line overflow-hidden bg-[#ddd2b4]">
-              <Image
-                src={character.imageUrl || "/default-character.webp"}
-                alt={character.name}
-                fill
-                priority
-                sizes="112px"
-                className="object-cover sepia-[.1]"
-              />
-            </div>
-            <PortraitUpload action={uploadPortrait.bind(null, id)} />
-          </div>
-
-          <div className="flex-1 space-y-3">
-            <div className="font-cairn text-2xl sm:text-3xl leading-none text-primary text-center sm:text-left">
-              Cairn
-            </div>
-            <Input
-              defaultValue={character.name}
-              onBlur={(e) => saveField("name", e.target.value)}
-              placeholder="Nom du personnage"
-              className="text-xl sm:text-2xl h-auto py-2 font-cairn"
+      <article className="mt-4 space-y-5 rounded-xl border-2 border-line bg-card/50 p-4 shadow-sm sm:mt-6 sm:space-y-6 sm:p-6">
+        {/* État + Armure / Sous */}
+        <section className="flex flex-wrap items-center gap-4">
+          <label className="flex w-fit cursor-pointer items-center gap-2 text-sm">
+            <Checkbox
+              defaultChecked={character.epuise}
+              onCheckedChange={(v) => saveField("epuise", v === true)}
             />
-            <label className="flex items-center gap-2 text-sm w-fit cursor-pointer">
-              <Checkbox
-                defaultChecked={character.epuise}
-                onCheckedChange={(v) => saveField("epuise", v === true)}
+            Épuisé·e
+          </label>
+          <div className="grid min-w-[16rem] flex-1 grid-cols-2 gap-3">
+            <label className="flex items-center justify-between gap-2 rounded-lg border border-line bg-card/70 p-3">
+              <span className="font-cairn">Armure</span>
+              <Input
+                type="number"
+                defaultValue={character.armure}
+                onBlur={(e) => saveField("armure", Number(e.target.value))}
+                className="w-16 text-center tabular-nums"
               />
-              Épuisé·e
             </label>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="rounded-lg border border-line bg-card/70 p-3 flex items-center justify-between gap-2">
-                <span className="font-cairn">Armure</span>
-                <Input
-                  type="number"
-                  defaultValue={character.armure}
-                  onBlur={(e) => saveField("armure", Number(e.target.value))}
-                  className="w-16 text-center tabular-nums"
-                />
-              </label>
-              <label className="rounded-lg border border-line bg-card/70 p-3 flex items-center justify-between gap-2">
-                <span className="font-cairn">Sous</span>
-                <Input
-                  type="number"
-                  defaultValue={character.sous}
-                  onBlur={(e) => saveField("sous", Number(e.target.value))}
-                  className="w-20 text-center tabular-nums"
-                />
-              </label>
-            </div>
+            <label className="flex items-center justify-between gap-2 rounded-lg border border-line bg-card/70 p-3">
+              <span className="font-cairn">Sous</span>
+              <Input
+                type="number"
+                defaultValue={character.sous}
+                onBlur={(e) => saveField("sous", Number(e.target.value))}
+                className="w-20 text-center tabular-nums"
+              />
+            </label>
           </div>
         </section>
 
