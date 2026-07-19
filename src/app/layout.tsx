@@ -28,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={`${cairnDisplay.variable} ${cairnBody.variable} h-full`}>
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+      <body className="min-h-full" suppressHydrationWarning>
         {children}
         <Toaster />
       </body>

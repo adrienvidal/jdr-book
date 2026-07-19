@@ -53,3 +53,9 @@ model Note {
   content   String   @default("")
   updatedAt DateTime @updatedAt
 }
+
+// Réglages de la campagne (mono-campagne → un seul enregistrement, id = "main").
+model Campaign {
+  id         String  @id @default("main")
+  mjImageUrl String?
+}

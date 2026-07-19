@@ -2,7 +2,6 @@
 import { useRef, useState } from "react";
 import { ImagePlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { uploadPortrait } from "@/app/actions/upload";
 import { Button } from "@/components/ui/button";
 
 // Portrait affiché en petit (colonne 3:4). On redimensionne côté client pour
@@ -31,7 +30,11 @@ async function downscale(file: File): Promise<File> {
   });
 }
 
-export function PortraitUpload({ characterId }: { characterId: string }) {
+export function PortraitUpload({
+  action,
+}: {
+  action: (formData: FormData) => Promise<void>;
+}) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState(false);
 
@@ -43,7 +46,7 @@ export function PortraitUpload({ characterId }: { characterId: string }) {
       const optimized = await downscale(file);
       const fd = new FormData();
       fd.append("file", optimized);
-      await uploadPortrait(characterId, fd);
+      await action(fd);
     } catch (err) {
       console.error(err);
       toast.error("L'import de l'image a échoué.");

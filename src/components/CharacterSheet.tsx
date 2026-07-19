@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Minus, Plus, Trash2 } from "lucide-react";
 import type { Character, Item } from "@prisma/client";
 import { deleteCharacter, updateCharacter } from "@/app/actions/characters";
+import { uploadPortrait } from "@/app/actions/upload";
 import { InventoryEditor } from "@/components/InventoryEditor";
 import { PortraitUpload } from "@/components/PortraitUpload";
 import { MAX_SLOTS } from "@/lib/inventory";
@@ -172,7 +173,7 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
         {/* En-tête : portrait + nom + épuisé */}
         <section className="flex flex-col sm:flex-row gap-4 sm:items-start">
           <div className="w-28 shrink-0 space-y-2 mx-auto sm:mx-0">
-            <div className="aspect-[3/4] rounded border border-line overflow-hidden bg-[#ddd2b4]">
+            <div className="aspect-[9/16] rounded border border-line overflow-hidden bg-[#ddd2b4]">
               {character.imageUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -182,7 +183,7 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
                 />
               )}
             </div>
-            <PortraitUpload characterId={id} />
+            <PortraitUpload action={uploadPortrait.bind(null, id)} />
           </div>
 
           <div className="flex-1 space-y-3">

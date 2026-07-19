@@ -1,16 +1,23 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { listCharacters } from "@/app/actions/characters";
+import { getCampaign } from "@/app/actions/campaign";
 import { listNotes } from "@/app/actions/notes";
+import { uploadMjPortrait } from "@/app/actions/upload";
 import { usedSlots } from "@/lib/inventory";
 import { MjNotes } from "@/components/MjNotes";
+import { PortraitUpload } from "@/components/PortraitUpload";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
 export default async function MjPage() {
-  const [characters, notes] = await Promise.all([listCharacters(), listNotes()]);
+  const [characters, notes, campaign] = await Promise.all([
+    listCharacters(),
+    listNotes(),
+    getCampaign(),
+  ]);
 
   return (
     <main className="min-h-screen p-4 sm:p-6 max-w-5xl mx-auto space-y-8">
@@ -20,7 +27,25 @@ export default async function MjPage() {
             <ArrowLeft /> Accueil
           </Link>
         </Button>
-        <h1 className="font-cairn text-4xl sm:text-5xl text-moss leading-none mt-2">Interface MJ</h1>
+        <div className="mt-2 flex items-end gap-4">
+          <div className="w-24 sm:w-28 shrink-0 space-y-2">
+            <div className="aspect-[9/16] rounded border border-line overflow-hidden bg-[#d9dcc3]">
+              {campaign.mjImageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={campaign.mjImageUrl}
+                  alt="Meneur de jeu"
+                  className="w-full h-full object-cover sepia-[.1]"
+                />
+              )}
+            </div>
+            <PortraitUpload action={uploadMjPortrait} />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Meneur de jeu</p>
+            <h1 className="font-cairn text-4xl sm:text-5xl text-moss leading-none">Interface MJ</h1>
+          </div>
+        </div>
       </div>
 
       <section>
