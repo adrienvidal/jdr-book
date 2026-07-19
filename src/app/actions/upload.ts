@@ -30,6 +30,6 @@ export async function uploadMjPortrait(formData: FormData): Promise<void> {
     update: { mjImageUrl: url },
     create: { id: "main", mjImageUrl: url },
   });
-  revalidatePath("/");
+  revalidatePath("/table");
   revalidatePath("/mj");
 }

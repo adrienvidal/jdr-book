@@ -23,7 +23,8 @@ export async function getCharacter(id: string) {
 
 export async function createCharacter(name: string): Promise<string> {
   const c = await prisma.character.create({ data: { name: name || "Sans nom" } });
-  revalidatePath("/");
+  revalidatePath("/table");
+  revalidatePath("/mj");
   return c.id;
 }
 
@@ -35,13 +36,14 @@ export async function createCharacterForm(formData: FormData): Promise<void> {
 export async function updateCharacter(id: string, data: Record<string, unknown>): Promise<void> {
   await prisma.character.update({ where: { id }, data });
   revalidatePath(`/character/${id}`);
-  revalidatePath("/");
+  revalidatePath("/table");
   revalidatePath("/mj");
 }
 
 export async function deleteCharacter(id: string): Promise<void> {
   await prisma.character.delete({ where: { id } });
-  revalidatePath("/");
+  revalidatePath("/table");
+  revalidatePath("/mj");
 }
 
 export async function addItem(characterId: string, data: ItemInput): Promise<void> {
