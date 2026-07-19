@@ -20,7 +20,7 @@
 
 ## Reste à faire
 - **Supprimer le perso de test « Aelric »** créé pendant les tests (encore dans la base Supabase) — via le bouton Supprimer de sa fiche.
-- **Durcir les secrets** avant tout usage réel : `AUTH_SECRET` est encore le placeholder ; `APP_PASSWORD="slip"` / `MJ_PASSWORD="admin"` sont faibles.
+- **Durcir les secrets** avant tout usage réel : `AUTH_SECRET` est encore le placeholder ; `APP_PASSWORD="slip"` / `MJ_PASSWORD="superslip"` sont faibles.
 - **Lot 3 — Session live** (prochain gros chantier) : lanceur de dés qui résout les jets *roll-under* (d20 sur FOR/DEX/VOL, dégâts = dé d'arme − armure) + temps réel (Supabase Realtime).
 - **Lot 4 — Prépa MJ** (PNJ, monstres, scénario). **Lot 5 — Compendium SRD Cairn.**
 - 2 polish déjà faits (rappel, ne pas refaire) : « ← Accueil » au-dessus du titre MJ + padding du tableau MJ.
@@ -37,3 +37,28 @@
 - Cookies `secure` conditionnés à la production (sinon refus en http local).
 - Thème : **univers clair unique** (parchemin), **pas de dark mode** — c'est l'identité Cairn, choix assumé.
 - Intégration : on **merge directement sur `main`** (branche courte → fast-forward → push → suppression), pas de PR tant que `gh` n'est pas là.
+
+---
+
+## Passe UI/UX — shadcn rethémé parchemin + responsive (même jour, `/loop`)
+
+### Réalisé
+- Spec : `docs/superpowers/specs/2026-07-19-ui-ux-shadcn-parchemin.md`.
+- **shadcn/ui installé** (CLI « nova », base **radix**) et **rethémé sur la palette parchemin** : mapping des tokens sémantiques shadcn (`--background`, `--primary`, `--muted-foreground`…) → couleurs Cairn dans `globals.css`. **Univers clair unique conservé** (pas de dark mode, `sonner` forcé en `theme="light"`). Geist retiré, polices Cairn gardées.
+- Collisions de tokens résolues : mes anciens `text-accent`/`text-muted` → migrés vers `text-primary`/`text-muted-foreground` (shadcn possède ces noms). Tokens sans collision gardés : `parch/panel/ink/line/moss`.
+- **6 surfaces migrées** vers composants shadcn (Card, Input, Textarea, Label, Checkbox, Button, Badge, Separator) : login, login MJ, accueil, nouveau perso, fiche perso, dashboard MJ.
+- **Responsive mobile-first** vérifié au navigateur (390px + 1280px) : attributs 2→4 col, en-tête fiche en colonne sur mobile, **dashboard MJ tableau (desktop) → cartes empilées (mobile)**, aucun overflow horizontal.
+- **Modals de confirmation `AlertDialog`** sur toutes les actions destructives : suppression perso, objet d'inventaire, note MJ. Anti-friction : suppression directe si l'élément est encore vide.
+- **Feedback de sauvegarde** : `useFieldSave` (autosave onBlur dédupliqué + toast `sonner` discret). Badge d'alerte de surcharge d'inventaire. `SubmitButton` avec état `pending`.
+- Vérifs vertes : `tsc`, `vitest` (9/9), `next build`, navigateur desktop+mobile (0 erreur console). Code mort retiré (`ui/dialog.tsx` non utilisé).
+- Travail sur la branche **`feat/ui-shadcn-parchemin`** (commits `0cf2db8` + finitions). **Pas encore mergée sur `main`** (intégration laissée à valider).
+
+### Reste à faire (hérité / nouveau)
+- **Merger `feat/ui-shadcn-parchemin` sur `main`** puis supprimer la branche (workflow habituel), quand validé.
+- Le perso de test s'appelle désormais **« Aelric le Brave »** (renommé pendant le test navigateur) — toujours à supprimer.
+- Reste inchangé : durcir les secrets, Lot 3 (session live/dés), Lot 4 (prépa MJ), Lot 5 (compendium).
+
+### Décisions
+- **Intégration shadcn = rethéme parchemin** (option recommandée), pas le look neutre par défaut.
+- shadcn possède les noms `accent`/`muted` → on lui laisse ces utilitaires et on migre le code ; le rouille passe par `primary`, le brun secondaire par `muted-foreground`.
+- Fatigue : on garde les **cases cliquables** (plus lisible qu'un Slider pour du 0–10 discret), juste rethémées.
