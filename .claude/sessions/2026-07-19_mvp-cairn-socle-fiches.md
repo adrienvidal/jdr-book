@@ -173,3 +173,24 @@ Spec landing : `docs/superpowers/specs/2026-07-19-landing-publique-commencer-des
 - **App privée → `noindex`** assumé (facile à inverser).
 - **Art direction responsive** en `<picture>` plutôt que 2 `next/image` (évite le double téléchargement).
 - Sources PNG des images de landing **ignorées** dans git (`/docs/landing*.png`), seul le WebP est versionné.
+
+---
+
+## Favicon de marque + fix « changements disparus » (même jour, suite)
+
+Tout poussé sur `origin/main` (dernier commit `f27d7ab`).
+
+### Réalisé
+- **Favicon custom** (`a8d356d`) : `icon.tsx` (32) + `apple-icon.tsx` (180) générés via `next/og`, **« C » en Pirata One sur fond rouille** (couleur du bouton *Commencer*). `favicon.ico` par défaut retiré. Routes `/icon` et `/apple-icon` ajoutées à `PUBLIC` du middleware (sinon redirigées → favicon cassé sur la landing publique).
+- **Bug corrigé : modif de perso (nom/portrait) qui « disparaît »** (`f27d7ab`). **Racine** (régression du refacto landing) : le dashboard a été déplacé `/` → `/table`, mais les server actions revalidaient encore `revalidatePath("/")`. Or `/table` est **statique** → la liste restait figée au build (l'écriture en base, elle, passait bien ; la fiche `/character/[id]`, dynamique + revalidée, montrait le changement — d'où « ça marche puis ça disparaît » en revenant sur la liste). **Fix** : `create/update/delete` + portrait MJ revalident `/table` ; création/suppression revalident aussi `/mj` (également statique et listant les persos). Test `revalidate.test.ts` (spy `next/cache` + prisma mocké) : rouge avant, vert après. Suite 12/12, build vert.
+  - **Note importante** : le bug ne se manifeste **qu'en prod** (en dev tout est dynamique). Après déploiement, le rebuild régénère `/table` depuis la base → les données déjà saisies réapparaissent.
+
+### Reste à faire
+- Inchangé : `NEXT_PUBLIC_SITE_URL` à définir en prod (liens OG absolus) ; manifest PWA + icônes (optionnel) ; réactiver l'auth MJ (`middleware.ts`, `TODO(à remettre)`) ; recréer le bucket `portraits` (public) en prod ; durcir les secrets.
+
+### Blockers
+- Aucun.
+
+### Décisions
+- **Icônes générées** (pas de fichiers binaires) via `next/og` + police co-localisée, cohérentes avec l'image OG.
+- **Règle de revalidation** : toute mutation de la collection de personnages doit revalider **toutes** les vues statiques qui l'affichent — aujourd'hui `/table` **et** `/mj` (+ `/character/[id]` sur update). À retenir si d'autres pages listant les persos apparaissent.
