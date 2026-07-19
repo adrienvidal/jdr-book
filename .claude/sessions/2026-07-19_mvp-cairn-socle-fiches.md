@@ -138,3 +138,7 @@ Spec : `docs/superpowers/specs/2026-07-19-landing-publique-commencer-design.md`.
 ### Décisions
 - **`/` = landing publique**, dashboard sur `/table` (route de la « table » de JDR).
 - **Commencer = `<Link href="/table">`** : aucune logique custom, le middleware gère entrée directe (cookie) ou mot de passe. Comportement « Continuer » d'un jeu vidéo.
+
+### Maj — fond de la landing (fait)
+- ✅ **Image de fond dédiée en place** (`fbd2435`) : `docs/landing1.png` (table de JDR : grimoire, carte, dés, plume) → `public/landing.webp` (2 Mo → 108 Ko via sharp). Cadrage `object-center`, overlay adouci pour garder l'ambiance chaude. Vérifié desktop + mobile. → le « Reste à faire : image de fond dédiée » est clos.
+- Sources PNG de la landing ignorées dans git (`.gitignore : /docs/landing*.png`), gardées en local ; WebP versionné.
