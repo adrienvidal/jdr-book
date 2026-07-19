@@ -136,7 +136,7 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
 
   async function onDelete() {
     await deleteCharacter(id);
-    router.push("/");
+    router.push("/table");
   }
 
   const attributs: [string, string, number, number][] = [
@@ -183,7 +183,7 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
               size="default"
               className="text-parch hover:bg-white/10 hover:text-white sm:text-base [&_svg]:sm:size-5"
             >
-              <Link href="/">
+              <Link href="/table">
                 <ArrowLeft /> Accueil
               </Link>
             </Button>

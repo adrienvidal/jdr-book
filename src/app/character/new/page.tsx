@@ -23,7 +23,7 @@ export default function NewCharacter() {
               Créer
             </SubmitButton>
             <Link
-              href="/"
+              href="/table"
               className="block text-center text-sm text-muted-foreground hover:text-primary underline"
             >
               ← Retour à l&apos;accueil
