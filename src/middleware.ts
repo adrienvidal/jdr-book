@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifySession } from "@/lib/auth";
 
-const PUBLIC = ["/", "/login", "/mj/login", "/opengraph-image"];
+const PUBLIC = ["/", "/login", "/mj/login", "/opengraph-image", "/icon", "/apple-icon"];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
