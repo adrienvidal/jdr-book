@@ -116,3 +116,25 @@
 - Fond du hero : **flou léger** (`blur-md`), on doit reconnaître l'image, pas un simple fond d'ambiance.
 - **Épuisé = toggle rouge** (cohérent avec le badge du dashboard MJ), pas une case à cocher.
 - **Pas de cartes imbriquées** sur la fiche : blocs = cartes sœurs, stats regroupées.
+
+---
+
+## Landing publique « façon jeu vidéo » (même jour)
+
+Spec : `docs/superpowers/specs/2026-07-19-landing-publique-commencer-design.md`. Commits `d…`/`42c220e`.
+
+### Réalisé
+- **Landing publique plein écran** (`42c220e`) : `/` devient un écran de démarrage façon jeu vidéo — fond cinématique (portrait par défaut assombri + vignette), titre **Cairn** en gothique, sous-titre « Compagnon de campagne », bouton **Commencer**, animations d'entrée. Composant serveur statique, aucune donnée/cookie.
+- **Dashboard déplacé sur `/table`** (protégé) : contenu de l'ancien `/` (grille perso + carte MJ) déplacé via `git mv` sans changement de logique.
+- **Câblage flux** : `/` ajouté à `PUBLIC` du middleware ; `loginApp` redirige désormais vers `/table` ; 4 liens « retour accueil » repointés `/` → `/table` (`character/new`, `mj/page`, `CharacterSheet` ×2 dont `router.push` après suppression).
+- **Vérifs vertes** : `next build` OK (`/` statique, `/table` présent), 9 tests vitest verts. Navigateur : `/` public affiche Cairn+Commencer ; `/table` sans cookie → 307 `/login` (curl) ; `/table` avec cookie → dashboard direct (« Continuer »).
+
+### Reste à faire
+- **Image de fond dédiée** pour la landing (actuellement le portrait par défaut dépanne) — emplacement déjà prêt dans `src/app/page.tsx`.
+
+### Blockers
+- Aucun.
+
+### Décisions
+- **`/` = landing publique**, dashboard sur `/table` (route de la « table » de JDR).
+- **Commencer = `<Link href="/table">`** : aucune logique custom, le middleware gère entrée directe (cookie) ou mot de passe. Comportement « Continuer » d'un jeu vidéo.
