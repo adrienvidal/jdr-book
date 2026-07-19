@@ -1,47 +1,110 @@
 "use client";
+import { Plus, X } from "lucide-react";
 import type { Note } from "@prisma/client";
 import { createNote, deleteNote, updateNote } from "@/app/actions/notes";
+import { useFieldSave } from "@/lib/use-field-save";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
-const cls = "rounded border border-line bg-panel px-2 py-1";
+function DeleteNoteButton({ note }: { note: Note }) {
+  const hasContent = note.title.trim() !== "" || note.content.trim() !== "";
+  const btn = (
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      className="text-destructive hover:text-destructive shrink-0"
+      aria-label="Supprimer la note"
+      {...(hasContent ? {} : { onClick: () => deleteNote(note.id) })}
+    >
+      <X />
+    </Button>
+  );
+
+  if (!hasContent) return btn;
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>{btn}</AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Supprimer cette note ?</AlertDialogTitle>
+          <AlertDialogDescription>
+            « {note.title || "Note sans titre"} » sera définitivement supprimée.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogAction onClick={() => deleteNote(note.id)}>Supprimer</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
 export function MjNotes({ notes }: { notes: Note[] }) {
+  const save = useFieldSave(
+    Object.fromEntries(
+      notes.flatMap((n) => [
+        [`${n.id}.title`, n.title],
+        [`${n.id}.content`, n.content],
+      ]),
+    ),
+  );
+
   return (
     <section className="space-y-3">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h2 className="font-cairn text-2xl text-moss">Notes secrètes</h2>
-        <button
+        <Button
           onClick={() => createNote()}
-          className="rounded bg-moss text-accent-fg px-3 py-1 text-sm hover:opacity-90"
+          size="sm"
+          className="bg-moss text-moss-fg hover:bg-moss/90"
         >
-          + Nouvelle note
-        </button>
+          <Plus /> Nouvelle note
+        </Button>
       </div>
-      {notes.length === 0 && <p className="text-sm text-muted">Aucune note.</p>}
+      {notes.length === 0 && (
+        <p className="text-sm text-muted-foreground">Aucune note pour l&apos;instant.</p>
+      )}
       {notes.map((n) => (
-        <div key={n.id} className="rounded-lg border border-line bg-panel/60 p-3 space-y-2">
+        <Card key={n.id} className="p-3 gap-2">
           <div className="flex items-center gap-2">
-            <input
+            <Input
               defaultValue={n.title}
-              onBlur={(e) => updateNote(n.id, { title: e.target.value })}
+              onBlur={(e) =>
+                save(`${n.id}.title`, e.target.value, () =>
+                  updateNote(n.id, { title: e.target.value }),
+                )
+              }
               placeholder="Titre"
-              className={`${cls} flex-1 font-cairn text-lg`}
+              className="flex-1 font-cairn text-lg h-9"
             />
-            <button
-              onClick={() => deleteNote(n.id)}
-              className="text-accent hover:opacity-80 text-sm"
-              aria-label="Supprimer la note"
-            >
-              ✕
-            </button>
+            <DeleteNoteButton note={n} />
           </div>
-          <textarea
+          <Textarea
             defaultValue={n.content}
-            onBlur={(e) => updateNote(n.id, { content: e.target.value })}
+            onBlur={(e) =>
+              save(`${n.id}.content`, e.target.value, () =>
+                updateNote(n.id, { content: e.target.value }),
+              )
+            }
             rows={4}
             placeholder="Contenu…"
-            className={`${cls} w-full`}
           />
-        </div>
+        </Card>
       ))}
     </section>
   );

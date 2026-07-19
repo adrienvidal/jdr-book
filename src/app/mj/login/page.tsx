@@ -1,4 +1,8 @@
 import { loginMj } from "@/app/actions/session";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default async function MjLoginPage({
   searchParams,
@@ -7,21 +11,40 @@ export default async function MjLoginPage({
 }) {
   const { error } = await searchParams;
   return (
-    <main className="min-h-screen grid place-items-center p-6">
-      <form action={loginMj} className="w-full max-w-sm space-y-4 rounded-xl border-2 border-line bg-panel/60 p-8 shadow-sm">
-        <h1 className="font-cairn text-4xl text-moss text-center leading-none">Interface MJ</h1>
-        <p className="text-center text-muted text-sm">Réservé au Warden</p>
-        {error && <p className="text-accent text-sm">Mot de passe incorrect.</p>}
-        <input
-          name="password"
-          type="password"
-          placeholder="Mot de passe MJ"
-          autoFocus
-          suppressHydrationWarning
-          className="w-full rounded border px-3 py-2 bg-transparent"
-        />
-        <button className="w-full rounded bg-moss text-accent-fg py-2 hover:opacity-90">Déverrouiller</button>
-      </form>
+    <main className="min-h-screen grid place-items-center p-4 sm:p-6">
+      <Card className="w-full max-w-sm border-2 border-moss/40 bg-card/70">
+        <CardHeader className="text-center">
+          <CardTitle className="font-cairn text-4xl text-moss leading-none">Interface MJ</CardTitle>
+          <p className="text-muted-foreground text-sm">Réservé au Warden</p>
+        </CardHeader>
+        <CardContent>
+          <form action={loginMj} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="password">Mot de passe MJ</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Mot de passe MJ"
+                autoFocus
+                suppressHydrationWarning
+                aria-invalid={!!error}
+              />
+              {error && (
+                <p className="text-destructive text-sm" role="alert">
+                  Mot de passe incorrect.
+                </p>
+              )}
+            </div>
+            <SubmitButton
+              className="w-full bg-moss text-moss-fg hover:bg-moss/90"
+              pendingLabel="Déverrouillage…"
+            >
+              Déverrouiller
+            </SubmitButton>
+          </form>
+        </CardContent>
+      </Card>
     </main>
   );
 }

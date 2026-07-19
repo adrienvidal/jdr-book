@@ -1,19 +1,36 @@
+import Link from "next/link";
 import { createCharacterForm } from "@/app/actions/characters";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default function NewCharacter() {
   return (
-    <main className="min-h-screen grid place-items-center p-6">
-      <form action={createCharacterForm} className="w-full max-w-sm space-y-4 rounded-xl border-2 border-line bg-panel/60 p-8 shadow-sm">
-        <h1 className="font-cairn text-3xl text-center">Nouveau personnage</h1>
-        <input
-          name="name"
-          placeholder="Nom"
-          autoFocus
-          required
-          className="w-full rounded border border-line bg-panel px-3 py-2"
-        />
-        <button className="w-full rounded bg-accent text-accent-fg py-2 hover:opacity-90">Créer</button>
-      </form>
+    <main className="min-h-screen grid place-items-center p-4 sm:p-6">
+      <Card className="w-full max-w-sm border-2 bg-card/70">
+        <CardHeader className="text-center">
+          <CardTitle className="font-cairn text-3xl">Nouveau personnage</CardTitle>
+          <p className="text-muted-foreground text-sm">Donnez-lui un nom pour commencer</p>
+        </CardHeader>
+        <CardContent>
+          <form action={createCharacterForm} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="name">Nom</Label>
+              <Input id="name" name="name" placeholder="Nom du personnage" autoFocus required />
+            </div>
+            <SubmitButton className="w-full" pendingLabel="Création…">
+              Créer
+            </SubmitButton>
+            <Link
+              href="/"
+              className="block text-center text-sm text-muted-foreground hover:text-primary underline"
+            >
+              ← Retour à l&apos;accueil
+            </Link>
+          </form>
+        </CardContent>
+      </Card>
     </main>
   );
 }

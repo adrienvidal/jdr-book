@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Pirata_One, EB_Garamond } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 const cairnDisplay = Pirata_One({
   weight: "400",
@@ -29,6 +30,7 @@ export default function RootLayout({
     <html lang="fr" className={`${cairnDisplay.variable} ${cairnBody.variable} h-full`}>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {children}
+        <Toaster />
       </body>
     </html>
   );
