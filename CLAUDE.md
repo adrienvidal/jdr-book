@@ -1,23 +1,5 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## Project
-
-`jdr-book` — application repository (nouvellement initialisée, aucun code pour l'instant).
-
-## État actuel
-
-Le dépôt est vide : `git` est initialisé mais il n'y a aucun commit ni fichier source.
-Cette section (commandes de build/lint/test, architecture) est à compléter une fois
-le projet scaffoldé — relancer `/init` à ce moment-là pour générer une documentation
-basée sur le code réel.
-
-## Conventions
-
-- Langue de travail : français.
-- Commits : ne commiter/pousser que sur demande explicite de l'utilisateur.
-
 ## Session Continuity
 
 En début de session :
