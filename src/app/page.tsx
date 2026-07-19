@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { cookies } from "next/headers";
 import { cookieName, verifySession } from "@/lib/auth";
 import { LandingStart } from "@/components/LandingStart";
@@ -19,16 +18,19 @@ export default async function Landing({
 
   return (
     <main className="relative min-h-dvh overflow-hidden">
-      {/* Fond cinématique */}
-      <Image
-        src="/landing.webp"
-        alt=""
-        aria-hidden
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover object-center scale-105"
-      />
+      {/* Fond cinématique — art direction : portrait sur mobile, paysage sur
+          desktop. <picture> pour ne télécharger que l'image du viewport courant. */}
+      <picture>
+        <source media="(min-width: 640px)" srcSet="/landing-desk.webp" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/landing.webp"
+          alt=""
+          aria-hidden
+          fetchPriority="high"
+          className="absolute inset-0 h-full w-full object-cover object-center scale-105"
+        />
+      </picture>
       {/* Assombrissement + vignette (image chaude : on garde l'ambiance) */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-black/80" />
       <div className="absolute inset-0 [background:radial-gradient(120%_85%_at_50%_42%,transparent_30%,rgba(0,0,0,0.6)_100%)]" />
