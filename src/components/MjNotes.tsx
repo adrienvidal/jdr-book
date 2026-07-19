@@ -66,12 +66,13 @@ export function MjNotes({ notes }: { notes: Note[] }) {
 
   return (
     <section className="space-y-3">
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="font-cairn text-2xl text-moss">Notes secrètes</h2>
+      <div className="flex items-center gap-3">
+        <h2 className="font-cairn text-2xl leading-none">Notes secrètes</h2>
+        <div className="h-px flex-1 bg-line" />
         <Button
           onClick={() => createNote()}
           size="sm"
-          className="bg-moss text-moss-fg hover:bg-moss/90"
+          className="shrink-0 bg-moss text-moss-fg hover:bg-moss/90"
         >
           <Plus /> Nouvelle note
         </Button>
