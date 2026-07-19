@@ -4,6 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/SubmitButton";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Nouveau personnage" };
 
 export default function NewCharacter() {
   return (

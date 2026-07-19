@@ -4,6 +4,9 @@ import { Plus, Shield, UserPlus } from "lucide-react";
 import { listCharacters } from "@/app/actions/characters";
 import { getCampaign } from "@/app/actions/campaign";
 import { Button } from "@/components/ui/button";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "La table" };
 
 export default async function Home() {
   const [characters, campaign] = await Promise.all([listCharacters(), getCampaign()]);
