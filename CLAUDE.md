@@ -1,5 +1,17 @@
 # CLAUDE.md
 
+## Skills
+
+Avant d'agir sur une tâche, vérifier si un skill installé est pertinent et l'utiliser le cas échéant. Les skills de process passent avant les skills d'implémentation.
+
+Repères pour ce projet :
+- Concevoir une feature → `superpowers:brainstorming`, puis `superpowers:writing-plans` / `superpowers:executing-plans`.
+- Corriger un bug → `superpowers:systematic-debugging`.
+- Implémenter une feature à moindre coût en tokens → `lean-development`.
+- Écrire/modifier de l'UI → un skill frontend (`frontend-design`, `impeccable`, `ui-ux-pro-max`, `theme-factory`).
+- Tester dans le navigateur → `webapp-testing` ; écrire du code de test → `superpowers:test-driven-development`.
+- Docs sur une lib/framework → serveur MCP `context7` plutôt que la mémoire.
+
 ## Session Continuity
 
 En début de session :
