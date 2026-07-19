@@ -194,3 +194,23 @@ Tout poussé sur `origin/main` (dernier commit `f27d7ab`).
 ### Décisions
 - **Icônes générées** (pas de fichiers binaires) via `next/og` + police co-localisée, cohérentes avec l'image OG.
 - **Règle de revalidation** : toute mutation de la collection de personnages doit revalider **toutes** les vues statiques qui l'affichent — aujourd'hui `/table` **et** `/mj` (+ `/character/[id]` sur update). À retenir si d'autres pages listant les persos apparaissent.
+
+---
+
+## Champ « Sorts » sur la fiche + fix build Vercel (même jour, suite)
+
+Tout poussé sur `origin/main` (dernier commit `f7bcb88`).
+
+### Réalisé
+- **Champ « Sorts »** ajouté à la fiche perso, à côté de Traits (`c250329`) : `sorts String @default("")` sur `Character` (juste après `traits`), migration `20260719192111_add_sorts_field` créée **et appliquée sur la base Supabase** (partagée → colonne déjà présente en prod, pas de step DB manuel). Bloc Textarea rendu après Traits dans la grille, autosave onBlur + tracking `useFieldSave` comme les autres blocs. `updateCharacter` prend un `data` libre → aucune modif d'action.
+- **Fix build Vercel** (`f7bcb88`) : le déploiement de `c250329` a échoué au type-check (`Property 'sorts' does not exist on type 'CharacterWithItems'`). **Racine** : le Prisma Client généré vit dans `node_modules` (non commité) et Vercel **restaure son cache de build** → client stale, types sans `sorts` (en local ça passait car la migration avait régénéré le client). **Fix** : `prisma generate` ajouté en **`postinstall`** (couvre le cache restauré) **et** en tête du **`build`** (`prisma generate && next build`, ceinture). Build local revérifié vert.
+
+### Reste à faire
+- Inchangé : `NEXT_PUBLIC_SITE_URL` à définir en prod (liens OG absolus) ; manifest PWA + icônes (optionnel) ; réactiver l'auth MJ (`middleware.ts`, `TODO(à remettre)`) ; recréer le bucket `portraits` (public) en prod ; durcir les secrets.
+
+### Blockers
+- Aucun.
+
+### Décisions
+- **Règle build Prisma + Vercel** : toujours régénérer le client au build (`postinstall` + `build`), sinon le cache node_modules de Vercel sert un client obsolète après tout changement de schéma. À garder pour les prochaines migrations.
+- Migrations appliquées depuis le poste local sur la base Supabase partagée → la colonne existe en prod dès le merge ; le déploiement n'a « que » à recompiler.
