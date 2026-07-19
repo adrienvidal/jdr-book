@@ -142,7 +142,7 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
     <main className="mx-auto min-h-screen max-w-4xl px-4 pb-8 sm:px-6">
       {/* Hero plein écran (breakout) : portrait net + fond flouté, nom en surimpression */}
       <div className="relative left-1/2 right-1/2 -mx-[50vw] h-[26rem] w-screen overflow-hidden bg-ink sm:h-[30rem]">
-        {/* Fond flouté qui remplit les bords (le portrait est vertical) */}
+        {/* Fond : même image, juste adoucie, pour remplir les bords (portrait vertical) */}
         <Image
           src={character.imageUrl || "/default-character.webp"}
           alt=""
@@ -150,9 +150,9 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
           fill
           priority
           sizes="100vw"
-          className="scale-110 object-cover opacity-80 blur-2xl"
+          className="scale-105 object-cover blur-md"
         />
-        <div className="absolute inset-0 bg-black/25" />
+        <div className="absolute inset-0 bg-black/15" />
 
         {/* Portrait net, non rogné, centré */}
         <div className="absolute inset-y-0 left-1/2 aspect-[9/16] -translate-x-1/2">
