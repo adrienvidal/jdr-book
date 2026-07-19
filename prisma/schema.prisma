@@ -28,6 +28,7 @@ model Character {
   epuise    Boolean  @default(false)
   fatigue   Int      @default(0)
   traits    String   @default("")
+  sorts     String   @default("")
   liens     String   @default("")
   presages  String   @default("")
   notes     String   @default("")

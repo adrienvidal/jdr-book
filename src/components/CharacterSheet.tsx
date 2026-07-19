@@ -113,6 +113,7 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
     pvMax: character.pvMax,
     passe: character.passe,
     traits: character.traits,
+    sorts: character.sorts,
     liens: character.liens,
     presages: character.presages,
     notes: character.notes,
@@ -328,6 +329,7 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
             [
               ["Passé", "passe", character.passe],
               ["Traits", "traits", character.traits],
+              ["Sorts", "sorts", character.sorts],
               ["Liens", "liens", character.liens],
               ["Présages", "presages", character.presages],
               ["Notes", "notes", character.notes],
