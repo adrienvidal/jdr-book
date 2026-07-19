@@ -24,7 +24,7 @@ export default function Landing() {
       <div className="absolute inset-0 [background:radial-gradient(120%_85%_at_50%_42%,transparent_30%,rgba(0,0,0,0.6)_100%)]" />
 
       {/* Contenu centré */}
-      <div className="relative z-10 flex min-h-dvh flex-col items-center justify-start px-6 pt-[19vh] text-center sm:justify-center sm:pt-0">
+      <div className="relative z-10 flex min-h-dvh flex-col items-center px-6 pt-[19vh] pb-[11vh] text-center">
         <h1 className="font-cairn animate-in fade-in slide-in-from-bottom-3 duration-700 text-parch text-7xl leading-none drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] sm:text-8xl md:text-9xl">
           Cairn
         </h1>
@@ -32,7 +32,7 @@ export default function Landing() {
           Compagnon de campagne
         </p>
 
-        <div className="animate-in fade-in slide-in-from-bottom-2 delay-300 fill-mode-backwards duration-700 mt-12">
+        <div className="animate-in fade-in slide-in-from-bottom-2 delay-300 fill-mode-backwards duration-700 mt-auto">
           <Button asChild size="lg" className="px-10 py-6 text-lg shadow-xl shadow-black/40">
             <Link href="/table">Commencer</Link>
           </Button>
