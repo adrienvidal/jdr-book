@@ -14,7 +14,7 @@ export default async function MjLoginPage({
     <main className="min-h-screen grid place-items-center p-4 sm:p-6">
       <Card className="w-full max-w-sm border-2 border-moss/40 bg-card/70">
         <CardHeader className="text-center">
-          <CardTitle className="font-cairn text-4xl text-moss leading-none">Interface MJ</CardTitle>
+          <CardTitle className="font-cairn text-4xl text-moss leading-none">Game Master</CardTitle>
           <p className="text-muted-foreground text-sm">Réservé au Warden</p>
         </CardHeader>
         <CardContent>

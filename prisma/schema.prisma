@@ -59,4 +59,5 @@ model Note {
 model Campaign {
   id         String  @id @default("main")
   mjImageUrl String?
+  mjTitle    String  @default("Game Master")
 }

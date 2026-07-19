@@ -8,6 +8,7 @@ import { uploadMjPortrait } from "@/app/actions/upload";
 import { usedSlots } from "@/lib/inventory";
 import { cn } from "@/lib/utils";
 import { MjNotes } from "@/components/MjNotes";
+import { MjTitleInput } from "@/components/MjTitleInput";
 import { PortraitUpload } from "@/components/PortraitUpload";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -79,9 +80,7 @@ export default async function MjPage() {
               <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-parch/70 sm:text-sm">
                 <Shield className="size-4" /> Meneur de jeu
               </p>
-              <h1 className="mt-1.5 font-cairn text-4xl text-parch drop-shadow-lg sm:text-5xl lg:text-6xl">
-                Interface&nbsp;MJ
-              </h1>
+              <MjTitleInput title={campaign.mjTitle} />
               <p className="mt-2 text-sm text-parch/80">
                 {nbCharacters} personnage{nbCharacters > 1 ? "s" : ""}
                 {nbExhausted > 0 && (
@@ -125,6 +124,8 @@ export default async function MjPage() {
                     <th className="font-medium">FOR</th>
                     <th className="font-medium">DEX</th>
                     <th className="font-medium">VOL</th>
+                    <th className="font-medium">Armure</th>
+                    <th className="font-medium">Sous</th>
                     <th className="font-medium">État</th>
                     <th className="font-medium">Slots</th>
                   </tr>
@@ -163,6 +164,8 @@ export default async function MjPage() {
                       <td className="tabular-nums">{c.force}</td>
                       <td className="tabular-nums">{c.dex}</td>
                       <td className="tabular-nums">{c.vol}</td>
+                      <td className="tabular-nums">{c.armure}</td>
+                      <td className="tabular-nums">{c.sous}</td>
                       <td>
                         {c.epuise ? (
                           <Badge variant="destructive">Épuisé</Badge>
@@ -206,6 +209,8 @@ export default async function MjPage() {
                     <Stat label="FOR" value={c.force} />
                     <Stat label="DEX" value={c.dex} />
                     <Stat label="VOL" value={c.vol} />
+                    <Stat label="Armure" value={c.armure} />
+                    <Stat label="Sous" value={c.sous} />
                   </dl>
                 </Card>
               ))}

@@ -91,8 +91,8 @@ export default async function Home() {
               <Shield className="size-4 text-moss-fg" />
             </div>
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#20281a]/90 via-[#20281a]/45 to-transparent px-3 pb-2.5 pt-10 text-center">
-              <span className="block font-cairn text-lg sm:text-xl text-moss-fg leading-none drop-shadow-sm">
-                Interface&nbsp;MJ
+              <span className="block font-cairn text-lg sm:text-xl text-moss-fg leading-none drop-shadow-sm truncate">
+                {campaign.mjTitle}
               </span>
               <span className="mt-1 block text-[11px] uppercase tracking-wide text-moss-fg/75">
                 Meneur de jeu
