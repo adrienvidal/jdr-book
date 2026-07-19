@@ -16,6 +16,7 @@ export default async function LoginPage({
           type="password"
           placeholder="Mot de passe"
           autoFocus
+          suppressHydrationWarning
           className="w-full rounded border px-3 py-2 bg-transparent"
         />
         <button className="w-full rounded bg-emerald-700 text-white py-2">Entrer</button>
