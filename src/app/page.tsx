@@ -29,7 +29,7 @@ export default function Landing() {
           Cairn
         </h1>
         <p className="animate-in fade-in slide-in-from-bottom-2 delay-150 fill-mode-backwards duration-700 mt-4 text-sm uppercase tracking-[0.35em] text-parch/70 sm:text-base">
-          Compagnon de campagne
+          Carnet de campagne
         </p>
 
         <div className="animate-in fade-in slide-in-from-bottom-2 delay-300 fill-mode-backwards duration-700 mt-auto">
