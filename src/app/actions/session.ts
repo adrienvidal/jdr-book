@@ -20,10 +20,6 @@ async function login(scope: Scope, password: string, dest: string, fail: string)
   redirect(dest);
 }
 
-export async function loginApp(formData: FormData) {
-  await login("app", String(formData.get("password") ?? ""), "/table", "/login?error=1");
-}
-
 export async function loginMj(formData: FormData) {
   await login("mj", String(formData.get("password") ?? ""), "/mj", "/mj/login?error=1");
 }

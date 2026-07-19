@@ -20,7 +20,14 @@ const START_CLASSES = "px-10 py-6 text-lg shadow-xl shadow-black/40";
 // Bouton « Commencer » de la landing.
 // - Déjà connecté : lien direct vers /table (entrée immédiate).
 // - Sinon : ouvre une modale de mot de passe sans quitter la landing.
-export function LandingStart({ authed }: { authed: boolean }) {
+//   `openLogin` (deep link `?login=1`) ouvre la modale d'emblée.
+export function LandingStart({
+  authed,
+  openLogin = false,
+}: {
+  authed: boolean;
+  openLogin?: boolean;
+}) {
   if (authed) {
     return (
       <Button asChild size="lg" className={START_CLASSES}>
@@ -28,16 +35,16 @@ export function LandingStart({ authed }: { authed: boolean }) {
       </Button>
     );
   }
-  return <LoginDialog />;
+  return <LoginDialog defaultOpen={openLogin} />;
 }
 
-function LoginDialog() {
+function LoginDialog({ defaultOpen }: { defaultOpen: boolean }) {
   const [state, formAction] = useActionState<LoginState, FormData>(loginAppAction, {
     error: false,
   });
 
   return (
-    <Dialog>
+    <Dialog defaultOpen={defaultOpen}>
       <DialogTrigger asChild>
         <Button size="lg" className={START_CLASSES}>
           Commencer

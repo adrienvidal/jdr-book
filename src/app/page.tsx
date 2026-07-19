@@ -7,8 +7,14 @@ import { LandingStart } from "@/components/LandingStart";
 // Route publique. On lit le cookie de session juste pour personnaliser le
 // bouton « Commencer » : connecté → entrée directe vers /table ; sinon → la
 // modale de mot de passe s'ouvre sur place (voir LandingStart).
-export default async function Landing() {
-  const jar = await cookies();
+// `?login=1` (posé par le middleware ou /login pour les deep links) ouvre la
+// modale automatiquement.
+export default async function Landing({
+  searchParams,
+}: {
+  searchParams: Promise<{ login?: string }>;
+}) {
+  const [jar, { login }] = await Promise.all([cookies(), searchParams]);
   const authed = await verifySession(jar.get(cookieName("app"))?.value, "app");
 
   return (
@@ -37,7 +43,7 @@ export default async function Landing() {
         </p>
 
         <div className="animate-in fade-in slide-in-from-bottom-2 delay-300 fill-mode-backwards duration-700 mt-auto">
-          <LandingStart authed={authed} />
+          <LandingStart authed={authed} openLogin={!!login} />
         </div>
       </div>
     </main>

@@ -9,7 +9,7 @@ export async function middleware(req: NextRequest) {
   if (PUBLIC.includes(pathname)) return NextResponse.next();
 
   const appOk = await verifySession(req.cookies.get("app_auth")?.value, "app");
-  if (!appOk) return NextResponse.redirect(new URL("/login", req.url));
+  if (!appOk) return NextResponse.redirect(new URL("/?login=1", req.url));
 
   // TODO(à remettre) : authentification MJ désactivée temporairement.
   // Réactiver en décommentant le bloc ci-dessous.
