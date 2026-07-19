@@ -26,49 +26,82 @@ export default async function MjPage() {
   const nbExhausted = characters.filter((c) => c.epuise).length;
 
   return (
-    <main className="min-h-screen max-w-5xl mx-auto p-4 sm:p-6 space-y-8 sm:space-y-10">
-      <header className="border-b border-line pb-5">
-        <Button asChild variant="ghost" size="sm" className="-ml-2">
-          <Link href="/">
-            <ArrowLeft /> Accueil
-          </Link>
-        </Button>
-        <div className="mt-3 flex items-center gap-4 sm:gap-5">
-          <div className="relative aspect-[9/16] w-20 shrink-0 overflow-hidden rounded-lg border border-moss/40 bg-[#d9dcc3] shadow-sm ring-1 ring-inset ring-moss/15 sm:w-24">
-            <Image
-              src={campaign.mjImageUrl || "/default-character.webp"}
-              alt="Meneur de jeu"
-              fill
-              priority
-              sizes="96px"
-              className="object-cover sepia-[.1]"
-            />
+    <main className="mx-auto min-h-screen max-w-5xl px-4 pb-10 sm:px-6">
+      {/* Hero plein écran (comme la fiche perso), décliné MJ */}
+      <div className="relative left-1/2 right-1/2 -mx-[50vw] h-[24rem] w-screen overflow-hidden bg-ink sm:h-[28rem]">
+        {/* Fond : portrait MJ adouci, remplit les bords */}
+        <Image
+          src={campaign.mjImageUrl || "/default-character.webp"}
+          alt=""
+          aria-hidden
+          fill
+          priority
+          sizes="100vw"
+          className="scale-105 object-cover blur-md"
+        />
+        <div className="absolute inset-0 bg-black/15" />
+
+        {/* Portrait net, centré */}
+        <div className="absolute inset-y-0 left-1/2 aspect-[9/16] -translate-x-1/2">
+          <Image
+            src={campaign.mjImageUrl || "/default-character.webp"}
+            alt="Meneur de jeu"
+            fill
+            priority
+            sizes="(max-width: 640px) 60vw, 280px"
+            className="object-cover sepia-[.08]"
+          />
+        </div>
+
+        {/* Barre du haut : Accueil */}
+        <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-black/55 to-transparent">
+          <div className="mx-auto flex max-w-5xl items-center px-4 py-3 sm:px-6">
+            <Button
+              asChild
+              variant="ghost"
+              size="default"
+              className="text-parch hover:bg-white/10 hover:text-white sm:text-base [&_svg]:sm:size-5"
+            >
+              <Link href="/">
+                <ArrowLeft /> Accueil
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        {/* Dégradé bas : identité MJ + bouton photo */}
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/45 to-transparent pt-20">
+          <div className="mx-auto flex max-w-5xl items-end justify-between gap-3 px-4 py-4 sm:px-6 sm:py-6">
+            <div className="min-w-0">
+              <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-parch/70 sm:text-sm">
+                <Shield className="size-4" /> Meneur de jeu
+              </p>
+              <h1 className="mt-1.5 font-cairn text-4xl text-parch drop-shadow-lg sm:text-5xl lg:text-6xl">
+                Interface&nbsp;MJ
+              </h1>
+              <p className="mt-2 text-sm text-parch/80">
+                {nbCharacters} personnage{nbCharacters > 1 ? "s" : ""}
+                {nbExhausted > 0 && (
+                  <span className="text-red-300">
+                    {" · "}
+                    {nbExhausted} épuisé{nbExhausted > 1 ? "s" : ""}
+                  </span>
+                )}
+                {" · "}
+                {nbNotes} note{nbNotes > 1 ? "s" : ""} secrète{nbNotes > 1 ? "s" : ""}
+              </p>
+            </div>
             <PortraitUpload
               action={uploadMjPortrait}
               label={null}
               size="icon"
-              className="absolute bottom-1.5 right-1.5 size-8 rounded-full border-0 bg-ink/60 text-parch shadow-md backdrop-blur-sm hover:bg-ink/80"
+              className="size-10 shrink-0 rounded-full border-0 bg-ink/60 text-parch shadow-md backdrop-blur-sm hover:bg-ink/80"
             />
           </div>
-          <div className="min-w-0">
-            <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-moss/80">
-              <Shield className="size-3.5" /> Meneur de jeu
-            </p>
-            <h1 className="mt-1 font-cairn text-4xl leading-none text-moss sm:text-5xl">
-              Interface&nbsp;MJ
-            </h1>
-            <p className="mt-2.5 text-sm text-muted-foreground">
-              {nbCharacters} personnage{nbCharacters > 1 ? "s" : ""}
-              {nbExhausted > 0 && (
-                <span className="text-destructive"> · {nbExhausted} épuisé{nbExhausted > 1 ? "s" : ""}</span>
-              )}
-              {" · "}
-              {nbNotes} note{nbNotes > 1 ? "s" : ""} secrète{nbNotes > 1 ? "s" : ""}
-            </p>
-          </div>
         </div>
-      </header>
+      </div>
 
+      <div className="mt-8 space-y-8 sm:mt-10 sm:space-y-10">
       <section>
         <div className="mb-4 flex items-center gap-3">
           <h2 className="font-cairn text-2xl leading-none">Personnages</h2>
@@ -178,7 +211,8 @@ export default async function MjPage() {
         )}
       </section>
 
-      <MjNotes notes={notes} />
+        <MjNotes notes={notes} />
+      </div>
     </main>
   );
 }

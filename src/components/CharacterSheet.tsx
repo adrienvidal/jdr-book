@@ -295,7 +295,7 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
           </div>
           <Separator className="my-4" />
           <div className="grid grid-cols-2 gap-4">
-            <label className="flex items-center justify-between gap-2">
+            <label className="flex items-center justify-center gap-3">
               <span className="font-cairn">Armure</span>
               <Input
                 type="number"
@@ -304,7 +304,7 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
                 className="w-16 text-center tabular-nums"
               />
             </label>
-            <label className="flex items-center justify-between gap-2">
+            <label className="flex items-center justify-center gap-3">
               <span className="font-cairn">Sous</span>
               <Input
                 type="number"
