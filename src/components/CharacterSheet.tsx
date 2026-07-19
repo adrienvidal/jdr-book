@@ -2,12 +2,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ImagePlus, Minus, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Trash2 } from "lucide-react";
 import type { Character, Item } from "@prisma/client";
 import { deleteCharacter, updateCharacter } from "@/app/actions/characters";
-import { uploadPortrait } from "@/app/actions/upload";
 import { InventoryEditor } from "@/components/InventoryEditor";
-import { SubmitButton } from "@/components/SubmitButton";
+import { PortraitUpload } from "@/components/PortraitUpload";
 import { MAX_SLOTS } from "@/lib/inventory";
 import { useFieldSave } from "@/lib/use-field-save";
 import { Button } from "@/components/ui/button";
@@ -183,16 +182,7 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
                 />
               )}
             </div>
-            <form action={uploadPortrait.bind(null, id)} className="space-y-1.5">
-              <Input type="file" name="file" accept="image/*" className="text-xs h-auto py-1.5" />
-              <SubmitButton
-                variant="secondary"
-                className="w-full h-8"
-                pendingLabel="Import…"
-              >
-                <ImagePlus /> Importer
-              </SubmitButton>
-            </form>
+            <PortraitUpload characterId={id} />
           </div>
 
           <div className="flex-1 space-y-3">
