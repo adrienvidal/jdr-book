@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Playwright MCP test artifacts
 .playwright-mcp/
+
+# Sources d'art de la landing (versionnées en WebP dans public/)
+/docs/landing*.png
