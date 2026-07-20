@@ -77,7 +77,7 @@ Correctif : `useActionState` et l'état d'ouverture remontent dans `LandingEnter
 
 ### Décisions
 - **La vidéo joue aussi quand on est déjà connecté** (choix d'Adrien) : c'est un rituel d'entrée, pas une récompense de première connexion.
-- **Audio retiré.** Lecture muette de toute façon, et un son surprise à l'entrée serait hostile.
+- ~~**Audio retiré.** Lecture muette de toute façon, et un son surprise à l'entrée serait hostile.~~ **Renversé au 8e temps** : Adrien veut le son sur les vidéos d'ouverture. Réintégré (voir « Son sur les vidéos d'ouverture »). Le son n'est pas une surprise : il ne part que sur l'action délibérée « Commencer ».
 - **Réencodage plutôt que l'original.** Arbitrage mesuré, pas supposé : à l'échelle d'affichage réelle, 916 Ko et 2 Mo sont indiscernables.
 
 ## 8e temps — Nouvelle image et boucle desk
@@ -109,6 +109,12 @@ Correctif : `useActionState` et l'état d'ouverture remontent dans `LandingEnter
 ### Position du titre calée sur le fond desk
 - Sur la scène desk (vue de dessus), le titre à `19vh` frôlait le livre fermé et les bougies du haut. Descendu à **27vh sur desktop** (`sm:pt-[27vh]`) : « Cairn » se centre dans le panneau de bois vide au centre de la table, entre les objets du haut et le grimoire ouvert ; le sous-titre garde de l'air au-dessus des dés. Valeur choisie par comparaison visuelle (19/24/27/30vh) à DPR 2.
 - **Mobile intact à 19vh** : autre composition (portrait), autre calage. Override par le seul breakpoint `sm:` (640px), le même que la bascule vidéo/image. Non-régression mobile vérifiée.
+
+### Son sur les vidéos d'ouverture
+- Adrien veut le son sur les vidéos d'ouverture (mobile-start **et** desk-start). Renverse la décision « audio retiré » du 7e temps.
+- **Audio réintégré sans réencoder la vidéo** : mux (copie de la piste vidéo déjà encodée + audio de la source). Durée 5,04 s préservée, +~85 Ko chacun. Niveaux sources mesurés (moyenne ~−25 dB, crêtes −4 à −7 dB) : propres, pas de normalisation.
+- **Code** (`LandingEnter.tsx`) : `muted` retiré de l'élément vidéo de la cérémonie (la boucle de fond, elle, **reste muette**). À la lecture, `el.muted=false` puis `play()` ; **repli en muet** si l'autoplay sonore est refusé (iOS strict / lecture différée hors du geste) plutôt que sauter la cérémonie ; abandon vers /table seulement si même la lecture muette échoue.
+- **Autoplay sonore autorisé** parce que la cérémonie part d'un clic (activation utilisateur persistante). Vérifié au navigateur : desktop et mobile jouent **non-muet** (`muted:false`, audio décodé), cérémonie complète jusqu'à /table ; mouvement réduit entre directement sans vidéo ni son.
 
 ### Le piège évité
 L'image `landing-desk2.png` (plan large, tabourets visibles) et la vidéo `landing-desk2.mp4` (plus resserrée) sont **deux compositions différentes** — vérifié : la recherche d'alignement par recadrage centré trouve son optimum à zoom 1,0, donc la vidéo n'est pas un agrandissement de l'image. Or l'ancienne paire était alignée au pixel (la vidéo = version animée de l'image). Livrer la nouvelle paire telle quelle aurait rejoué, sur desktop, **le saut de zoom au fondu image→vidéo** qu'Adrien venait de faire supprimer sur mobile. D'où la question posée, et la base dérivée de la vidéo : fondu invisible par construction (vérifié au navigateur en 1440, cadrages identiques).

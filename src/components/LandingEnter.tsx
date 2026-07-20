@@ -115,9 +115,16 @@ export function LandingEnter({
     const el = video.current;
     if (!el) return;
 
-    // Autoplay refusé, décodage en échec : on n'abandonne pas l'utilisateur
-    // devant un écran figé, on entre.
-    void el.play().catch(leave);
+    // La cérémonie est déclenchée par un clic (activation utilisateur), donc
+    // l'autoplay avec son est autorisé. Si un navigateur le refuse quand même
+    // (iOS strict, lecture différée hors du geste), on rejoue en muet plutôt
+    // que de sauter la cérémonie ; ce n'est qu'en dernier recours — décodage
+    // en échec — qu'on abandonne la vidéo et qu'on entre.
+    el.muted = false;
+    el.play().catch(() => {
+      el.muted = true;
+      void el.play().catch(leave);
+    });
 
     // Même filet pour un flux qui cale : `ended` ne viendrait jamais.
     const budget = ((Number.isFinite(el.duration) && el.duration) || 5) * 1000 + 3000;
@@ -189,9 +196,11 @@ export function LandingEnter({
           `scale-105` comme la boucle de fond et l'image de base : la vidéo
           d'ouverture est cadrée à l'identique de la boucle, sans cette même
           échelle le fondu passerait de 105 % à 100 % — un dézoom visible. */}
+      {/* Pas de `muted` ici (contrairement à la boucle de fond) : la cérémonie
+          a du son. On l'active à la lecture — voir l'effet ci-dessus — pour
+          garder le repli muet quand l'autoplay sonore est refusé. */}
       <video
         ref={video}
-        muted
         playsInline
         preload="none"
         aria-hidden
