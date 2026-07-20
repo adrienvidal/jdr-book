@@ -19,9 +19,14 @@
 // - pas d'agrandissement à l'écran : viser au moins 1248 px de haut, la demande
 //   du pire cas (mobile à DPR 3). En deçà, l'image serait plus nette que la vidéo.
 //
-// Vérifié sur les quatre vidéos : pire image entre 37,6 et 39,1 dB à l'échelle
+// Vérifié sur les cinq vidéos : pire image entre 37,6 et 39,1 dB à l'échelle
 // d'affichage réelle. Si une nouvelle descend nettement sous 37 dB, remesurer
 // avant de la livrer.
+//
+// Le nom du fichier désigne le PERSONNAGE, pas la prise : une nouvelle version
+// écrase la précédente au même chemin. Sans risque de cache — Vercel sert les
+// fichiers de public/ en « max-age=0, must-revalidate » avec etag (vérifié),
+// donc le navigateur revalide à chaque requête.
 export const ANIMATED_PORTRAITS: Record<string, string> = {
   // Coltar le silencieux
   cmrrrjuf800000nat4wjcfidn: "/portraits/coltar.mp4",
