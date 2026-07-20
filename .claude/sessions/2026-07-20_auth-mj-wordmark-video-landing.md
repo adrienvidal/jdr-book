@@ -35,15 +35,24 @@ Tout poussé sur `origin/main` (dernier commit `469b085`). `main` en sync.
 - **La compression n'était qu'un facteur mineur** : baisser le CRF ne comblait que **1 %** de l'écart pour 5× le poids. Le levier est le **masque de netteté** (`unsharp=5:5:2.0`), qui rend le CRF indifférent (296 Ko et 1368 Ko donnent la même netteté). Absence de halos vérifiée sur lanterne et bougie.
 - **Limite assumée** : la source vidéo est intrinsèquement moins détaillée que l'image fixe (3,95 même non compressée, contre 14,21). L'accentuation récupère un peu plus de la moitié de l'écart ; égaler l'image demanderait de **régénérer la vidéo à la source**.
 
+### Vérifications de prod + durcissement des secrets (2e temps de la journée)
+Aucun changement de code : uniquement de la config et de la vérification sur `https://jdr-book.vercel.app`.
+
+- **`NEXT_PUBLIC_SITE_URL` posée** (local `http://localhost:3000`, prod sur Vercel) et redéployée. `og:url` et `og:image` sortent absolus, sans slash final. **Nuance : non prouvé.** La valeur attendue est identique à ce qu'aurait donné le repli `VERCEL_PROJECT_PRODUCTION_URL` — les deux branches du `??` convergent. Ne deviendra discriminant qu'au branchement d'un domaine custom.
+- **Vidéos servies sans cookie : confirmé.** `landing-desk.mp4` (302 606 b) et `landing-mobile.mp4` (376 035 b) en `200 video/mp4`, tailles identiques à l'octet près aux fichiers locaux. Idem `landing*.webp`, `default-character.webp`, `opengraph-image`, `icon`, `apple-icon`. **Contrôle indispensable au test** : `/table` et `/mj` renvoient bien `307 → /?login=1` sans cookie — donc ce sont les exclusions du `matcher` qui laissent passer, pas une auth cassée. Aucun troisième oubli du type icônes/vidéos sur les assets présents.
+- **Bucket `portraits` : déjà présent, la note précédente était périmée.** Sondé sans identifiants via `/storage/v1/object/public/portraits/<fichier-bidon>` → `"Object not found"`, contre `"Bucket not found"` sur un bucket inexistant (contrôle joué). Le caractère **public** est très probable mais pas formellement établi — preuve définitive au premier portrait affiché.
+- **`MJ_PASSWORD` retiré des variables Vercel** par Adrien.
+- **`AUTH_SECRET` durci** : placeholder remplacé par 64 caractères aléatoires (`token_urlsafe(48)`). Valeur dans `.env` local uniquement — **jamais dans un fichier suivi**. Reste à reporter sur Vercel.
+- **`APP_PASSWORD` laissé à `slip`, sur arbitrage explicite d'Adrien** (voir Décisions).
+
 ### Vérifs
-`tsc` + `next build` verts, **12/12 vitest** à chaque étape. Navigateur sur le **build de prod** : desktop 1440 (+ Retina DPR 2) et mobile 390, une seule vidéo par viewport, mouvement réduit = **0 octet chargé**, parcours de connexion intact, 0 erreur console.
+`tsc` + `next build` verts, **12/12 vitest** à chaque étape (y compris après rotation d'`AUTH_SECRET` : les tests utilisent leurs propres stubs d'env). Navigateur sur le **build de prod** : desktop 1440 (+ Retina DPR 2) et mobile 390, une seule vidéo par viewport, mouvement réduit = **0 octet chargé**, parcours de connexion intact, 0 erreur console.
 
 ## Reste à faire
-- **`NEXT_PUBLIC_SITE_URL`** à définir sur Vercel (liens OG absolus, sinon repli URL Vercel).
-- **Recréer le bucket `portraits` (public)** en prod.
-- **Durcir les secrets** (`AUTH_SECRET` encore placeholder, `APP_PASSWORD` faible).
-- **Supprimer `MJ_PASSWORD` des variables d'environnement Vercel** (plus lu par le code depuis `ae31f9e`).
-- **Vérifier en prod que les vidéos se chargent sans cookie** (le fix du `matcher` est ce qui le garantit).
+- **Reporter `AUTH_SECRET` sur Vercel** (scope Production) puis redéployer. Variable lue à l'exécution, pas inlinée. **Effet de bord : invalide tous les cookies `app_auth` émis**, chacun se reconnecte une fois.
+- **Sécurité de `loginAppAction`**, non traitée, à arbitrer si l'app s'ouvre au-delà de la table :
+  - **aucune limitation de tentatives** — c'est le vrai sujet, il n'y a rien entre un attaquant et un essai illimité ;
+  - `checkPassword` compare avec `===`, donc en **temps non constant** (théorique ici, bruit réseau largement supérieur au signal).
 - Optionnel : manifest PWA + icônes 192/512.
 - Optionnel : `autoComplete="current-password"` sur le champ de la modale (Chrome émet un avis verbose).
 - Optionnel : **régénérer les vidéos à plus haute définition** à la source, seul moyen d'égaler la netteté de l'image fixe.
@@ -54,6 +63,9 @@ Tout poussé sur `origin/main` (dernier commit `469b085`). `main` en sync.
 - Aucun.
 
 ## Décisions
+- **`APP_PASSWORD` reste `slip`**, choix explicite d'Adrien après mesure. Le mot de passe se dicte à voix haute autour d'une table : la mémorisation a une valeur réelle, l'enjeu est un carnet de campagne entre joueurs. **Ne pas le « corriger » spontanément.** Risque résiduel connu et accepté : mot du dictionnaire, cassé au premier essai d'une attaque par dictionnaire — ce n'était pas « 15 h de brute force ».
+- **`AUTH_SECRET` est l'arbitrage inverse** : aucun humain ne le tape, donc aucune raison de l'affaiblir. C'est lui qui ferme la **forge de cookie** (entrer sans passer par le formulaire) ; le mot de passe ne garde que la porte d'entrée. Deux protections distinctes, d'où deux niveaux d'exigence différents.
+- **Entropie d'une phrase de passe, mesurée** (10 essais/s, sans throttling) : 19 bits → 15 h ; **36 bits (5 mots français) → 54 ans** ; 63 bits (4 mots du dictionnaire système) → inviolable mais indictable. **Au-delà de 5 mots le compromis n'existe plus** : on paie de la lisibilité contre une menace déjà nulle. Si un vrai mot de passe devient nécessaire, viser 5 mots.
 - **Auth MJ supprimée, pas réactivée.** Le claim `scope:"app"` du JWT est conservé pour la compatibilité des cookies existants — à ne pas retirer sans accepter de déconnecter tout le monde.
 - **Le wordmark est le lien d'accueil** sur `/table`. « Accueil » dans les boutons retour désigne toujours `/table` (fiche perso, `/mj`) ; la landing `/` est l'« écran-titre ».
 - **Sources d'art ignorées dans git** : `/docs/landing*.png` **et** `/docs/landing*.mp4`. Seules les versions optimisées de `public/` sont versionnées.
@@ -66,3 +78,6 @@ Tout poussé sur `origin/main` (dernier commit `469b085`). `main` en sync.
 - **Une mesure sans référence ne vaut rien.** J'ai d'abord déclaré la boucle « quasi parfaite » sur un écart absolu de 2,3/255, sans le comparer au mouvement image-à-image. Rapporté à cette référence, l'écart valait 11,8× — la boucle sautait franchement. L'intuition d'Adrien était juste contre ma mesure.
 - **Attention aux artefacts d'image-clé quand on mesure un raccord de boucle sur un fichier encodé** : les premières images après une I-frame portent un bruit de quantification (~0,5 ici) qui masque complètement le signal. Mesurer sur la séquence d'images **avant** encodage.
 - **Ne pas faire arbitrer un compromis avant de l'avoir mesuré.** J'ai fait choisir un niveau de CRF en présentant un arbitrage netteté/poids qui n'existait pas : le CRF ne changeait quasi rien à la netteté. Mesurer d'abord, proposer ensuite.
+- **Toujours jouer le contrôle négatif.** Les deux vérifs de l'après-midi ne valaient que par leur témoin : les assets en `200` ne prouvaient rien tant que `/table` ne renvoyait pas `307`, et `"Object not found"` ne prouvait rien tant qu'un bucket bidon ne renvoyait pas `"Bucket not found"`. Sans le témoin, une auth entièrement cassée aurait produit le même résultat « tout vert ».
+- **Une note de session est datée, pas vraie.** « Recréer le bucket » traînait depuis la veille alors que le bucket existait. Sonder avant de faire agir Adrien.
+- **Une convergence n'est pas une preuve.** `og:url` correct ne montre pas que `NEXT_PUBLIC_SITE_URL` est lue : le repli donnait la même valeur. Distinguer ce qu'on observe de ce qu'on en déduit.
