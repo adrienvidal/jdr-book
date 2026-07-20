@@ -46,8 +46,13 @@ export default async function Landing({
       <div className="absolute inset-0 bg-linear-to-b from-black/38 via-black/18 to-black/66" />
       <div className="absolute inset-0 [background:radial-gradient(120%_85%_at_50%_42%,transparent_30%,rgba(0,0,0,0.45)_100%)]" />
 
-      {/* Contenu centré */}
-      <div className="relative z-10 flex min-h-dvh flex-col items-center px-6 pt-[19vh] pb-[11vh] text-center">
+      {/* Contenu centré. Le retrait haut diffère par viewport parce que le fond
+          diffère : sur desktop (scène en vue de dessus), le titre se cale dans
+          le panneau de bois vide au centre de la table, entre les objets du
+          haut et le grimoire — d'où 27vh. Sur mobile (autre composition,
+          portrait), 19vh reste le bon calage. Le point de bascule `sm:` (640px)
+          est le même que celui de la source vidéo/image. */}
+      <div className="relative z-10 flex min-h-dvh flex-col items-center px-6 pt-[19vh] pb-[11vh] text-center sm:pt-[27vh]">
         <h1 className="font-cairn animate-in fade-in slide-in-from-bottom-3 duration-700 text-parch text-7xl leading-none drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] sm:text-8xl md:text-9xl">
           Cairn
         </h1>

@@ -106,6 +106,10 @@ Correctif : `useActionState` et l'état d'ouverture remontent dans `LandingEnter
 - **Code** (`LandingEnter.tsx`) : `START_VIDEO` constant remplacé par `startVideoSrc()` qui choisit selon le viewport (`min-width: 640px`), exactement comme `LandingVideo` pour la boucle de fond — l'attribut `media` de `<source>` n'étant pas honoré dans `<video>`. Desktop → `landing-desk-start`, mobile → `landing-mobile-start`.
 - **Vérifié au navigateur** DPR 2 : desktop charge bien la paysage (1924), plein cadre sans recadrage, joue 0→5,04 s puis `/table` ; mobile 390 charge toujours la portrait (720). Non-régression confirmée des deux côtés.
 
+### Position du titre calée sur le fond desk
+- Sur la scène desk (vue de dessus), le titre à `19vh` frôlait le livre fermé et les bougies du haut. Descendu à **27vh sur desktop** (`sm:pt-[27vh]`) : « Cairn » se centre dans le panneau de bois vide au centre de la table, entre les objets du haut et le grimoire ouvert ; le sous-titre garde de l'air au-dessus des dés. Valeur choisie par comparaison visuelle (19/24/27/30vh) à DPR 2.
+- **Mobile intact à 19vh** : autre composition (portrait), autre calage. Override par le seul breakpoint `sm:` (640px), le même que la bascule vidéo/image. Non-régression mobile vérifiée.
+
 ### Le piège évité
 L'image `landing-desk2.png` (plan large, tabourets visibles) et la vidéo `landing-desk2.mp4` (plus resserrée) sont **deux compositions différentes** — vérifié : la recherche d'alignement par recadrage centré trouve son optimum à zoom 1,0, donc la vidéo n'est pas un agrandissement de l'image. Or l'ancienne paire était alignée au pixel (la vidéo = version animée de l'image). Livrer la nouvelle paire telle quelle aurait rejoué, sur desktop, **le saut de zoom au fondu image→vidéo** qu'Adrien venait de faire supprimer sur mobile. D'où la question posée, et la base dérivée de la vidéo : fondu invisible par construction (vérifié au navigateur en 1440, cadrages identiques).
 
