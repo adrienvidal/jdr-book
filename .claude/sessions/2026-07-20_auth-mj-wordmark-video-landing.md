@@ -80,6 +80,36 @@ Correctif : `useActionState` et l'état d'ouverture remontent dans `LandingEnter
 - **Audio retiré.** Lecture muette de toute façon, et un son surprise à l'entrée serait hostile.
 - **Réencodage plutôt que l'original.** Arbitrage mesuré, pas supposé : à l'échelle d'affichage réelle, 916 Ko et 2 Mo sont indiscernables.
 
+## 8e temps — Nouvelle image et boucle desk
+
+### Réalisé
+- Adrien a fourni `docs/landing-desk2.png` et `docs/landing-desk2.mp4` (scène redessinée : table en vue de dessus). Régénéré les assets `public/` desk.
+- **Boucle vidéo** : la nouvelle source ne bouclait pas non plus (écart au raccord 2,37 = **9,2× le mouvement normal**, aucune coupe seule ne descendait sous 5,9×). Réappliqué la chaîne validée : coupe de 4 images d'amorce → fondu enchaîné de 12 images → `unsharp=5:5:2.0` → H.264 CRF 28 sans audio, `+faststart`. Écart au raccord ramené à **0,164 (0,65×)**, mesuré avant encodage. 361 Ko, 4,375 s.
+- **Image de base** (`landing-desk.webp`) : **dérivée de la frame 0 de la boucle**, accentuée, q82 WebP (120 Ko). Choix d'Adrien.
+
+### Correction qualité (même temps, après retour d'Adrien « mauvaise qualité »)
+- **Cause mesurée à DPR 2** (et non sur vignette) : la source 1284 px étirée sur ~3000 px physiques Retina → flou. Le CRF n'était pas en cause (mon output 673 kbps > ancien validé 550). **Le levier est la résolution d'encodage**, pas le débit : à plus haute résolution le navigateur upscale beaucoup moins et l'accentuation porte plus.
+- Comparé sur la page à DPR 2 : native 1284 (mou) < 1920 < **2560** (net). Puis remonté le CRF sans perte : CRF25 (1258 Ko) et **CRF29 (595 Ko) indiscernables** → la résolution suffit, le débit non.
+- **Assets finaux** : vidéo `scale=2560:lanczos, unsharp=5:5:1.0, CRF 29, sans audio, +faststart` → **595 Ko** ; base `landing-desk.webp` régénérée au **même pipeline 2560** (q80, 155 Ko) pour que le repli soit net et reste aligné sur la vidéo. `unsharp` ramené de 2.0 à **1.0** (source plus molle → 2.0 sur-piquait/haloait).
+- **Chaîne desk révisée** (remplace la native 1284 des temps précédents pour CETTE scène, plus détaillée) : boucle → `scale=2560:lanczos` → `unsharp=5:5:1.0` → H.264 CRF 29 sans audio +faststart.
+
+### Remplacement par landing-desk3 (source haute résolution)
+- Adrien a fourni `docs/landing-desk3.mp4` en **1924×1076** (vs 1284 pour desk2). Remplacé la scène desk.
+- Même diagnostic de boucle (raccord 12× le mouvement normal) → même fondu enchaîné 12 images. Raccord ramené à **0,71×** (avant encodage).
+- **Résolution native suffit** : la source étant vraiment en 1924, natif 1924 (391 Ko) et upscale 2560 (534 Ko) sont indiscernables à DPR 2. Retenu le **natif 1924** — plus léger, aucun pixel inventé. Plus de `scale` dans la chaîne pour desk3.
+- Base `landing-desk.webp` régénérée depuis la frame 0, natif 1924, `unsharp=5:5:1.0`, q78 (143 Ko). Cadrage base↔frame0 vidéo vérifié (MAD 1,43) → fondu invisible.
+- **Chaîne desk3 (source ≥ résolution d'affichage)** : boucle → `unsharp=5:5:1.0` → H.264 CRF 29 sans audio +faststart, **résolution native**. L'upscale n'est utile que si la source est sous la résolution d'affichage Retina (cas desk2 en 1284).
+
+### Le piège évité
+L'image `landing-desk2.png` (plan large, tabourets visibles) et la vidéo `landing-desk2.mp4` (plus resserrée) sont **deux compositions différentes** — vérifié : la recherche d'alignement par recadrage centré trouve son optimum à zoom 1,0, donc la vidéo n'est pas un agrandissement de l'image. Or l'ancienne paire était alignée au pixel (la vidéo = version animée de l'image). Livrer la nouvelle paire telle quelle aurait rejoué, sur desktop, **le saut de zoom au fondu image→vidéo** qu'Adrien venait de faire supprimer sur mobile. D'où la question posée, et la base dérivée de la vidéo : fondu invisible par construction (vérifié au navigateur en 1440, cadrages identiques).
+
+### Fausse alerte instructive
+Le fichier servi mesurait un raccord à **5,7× le mouvement normal** — apparence de régression. En réalité **artefact de mesure de la frame I** : le pic tombe toujours sur la transition 0→1, frame 0 étant un keyframe reconstruit à part. Référence décisive : les **anciennes boucles validées sur téléphone** mesurent, même méthode, 1,08 (desk, 8,0×) et 1,77 (mobile, 6,4×). La nouvelle (1,18, 5,7×) est dans la plage, meilleure en ratio. La vraie continuité de contenu (0,65×, avant encodage) est le bon chiffre. — *Leçon : mesurer le raccord d'une boucle **avant** l'encodage h264, ou comparer à une boucle de référence encodée pareil ; le wrap post-h264 est gonflé par le keyframe.*
+
+### Reste à faire (ajouts de ce temps)
+- Sources `docs/landing-desk.png` / `landing-desk.mp4` (anciennes) devenues obsolètes ; `docs/*` art est de toute façon gitignoré. À supprimer au prochain ménage si confirmé.
+- Contrôle à faire par Adrien sur écran réel : netteté du repli desk (mouvement réduit / autoplay refusé) maintenant qu'il vient d'une frame vidéo et non d'un PNG dédié — arbitrage accepté, mais à confirmer en usage.
+
 ## Reste à faire
 - **Reporter `AUTH_SECRET` sur Vercel** (scope Production) puis redéployer. Variable lue à l'exécution, pas inlinée. **Effet de bord : invalide tous les cookies `app_auth` émis**, chacun se reconnecte une fois.
 - **Sécurité de `loginAppAction`**, non traitée, à arbitrer si l'app s'ouvre au-delà de la table :
