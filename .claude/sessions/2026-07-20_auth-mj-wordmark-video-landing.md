@@ -48,6 +48,38 @@ Aucun changement de code : uniquement de la config et de la vérification sur `h
 ### Vérifs
 `tsc` + `next build` verts, **12/12 vitest** à chaque étape (y compris après rotation d'`AUTH_SECRET` : les tests utilisent leurs propres stubs d'env). Navigateur sur le **build de prod** : desktop 1440 (+ Retina DPR 2) et mobile 390, une seule vidéo par viewport, mouvement réduit = **0 octet chargé**, parcours de connexion intact, 0 erreur console.
 
+## 7e temps — Vidéo d'ouverture au clic sur « Commencer »
+
+### Réalisé
+- **Séquence d'entrée** : clic → (mot de passe si besoin) → le bouton et la signature s'effacent (450 ms) → la vidéo d'ouverture couvre l'écran → à la fin, fondu de 550 ms vers le parchemin, puis `/table`. Mesurée bout en bout au navigateur, pas supposée : bloc à 0 dès 1,1 s, vidéo jouée 0 → 5,04 s, voile à 1,00 à 6,8 s, `/table` à 7,5 s.
+- **`LandingStart.tsx` → `LandingEnter.tsx`** (`git mv`, historique conservé). Le composant possède désormais le bloc du bas *entier* — bouton **et** signature — parce que la cérémonie les efface d'un seul geste ; les découper entre serveur et client obligerait à faire remonter la phase.
+- **`loginAppAction` ne redirige plus** : elle renvoie `{ ok: true }`. La redirection serveur tuait la landing avant que la vidéo puisse jouer.
+- **Vidéo réencodée** : 8,5 Mo → **916 Ko** (720 px de large, CRF 23, piste audio retirée). Comparée à un encodage natif 1076 px / 2 Mo **à l'échelle d'affichage réelle (390 px)** : indiscernables. SSIM 0,984.
+- **Fondu d'arrivée sur `/table`** (`animate-in fade-in duration-500`) : le voile de sortie est du même parchemin que le fond de la page, donc il ne se lève pas sur un saut de couleur.
+
+### Le bug qui a coûté le plus de temps
+Le mot de passe passait, la modale se fermait, **et rien ne partait**. Diagnostic par instrumentation (compteur de montage + trace de phase) plutôt que par relecture : aucun remontage, la phase ne quittait jamais `idle`.
+
+Cause : poser le cookie **déclenche un rafraîchissement de l'arbre RSC**. `authed` repasse à `true`, `LandingEnter` bascule sur la branche « lien direct », et **`LoginDialog` est démonté avant que son `useEffect` sur `state.ok` ne se déclenche**. Le signal de succès mourait avec le composant censé lancer la cérémonie.
+
+Correctif : `useActionState` et l'état d'ouverture remontent dans `LandingEnter` (l'écoute du succès doit survivre à la modale), et `authed` est **figé au premier rendu** (`wasAuthed`) pour que la branche du bouton ne bascule pas sous l'utilisateur.
+
+### Filets posés
+- **Mouvement réduit** : pas de cérémonie, entrée directe (mesuré : `/table` en 927 ms).
+- **Autoplay refusé, décodage en échec, flux qui cale** : on entre quand même. Le garde-fou anti-blocage est calé sur la durée réelle de la vidéo + 3 s, pas sur une constante en dur.
+- **Préchargement à l'intention** (survol, focus, ouverture de la modale), pas au montage : 916 Ko de plus ne partent pas pour un visiteur qui ne fait que regarder. Sur le parcours mot de passe, la saisie sert de fenêtre de chargement.
+- Le bouton connecté **reste un vrai lien** : clic milieu et « ouvrir dans un onglet » continuent de marcher, seul le clic simple joue la vidéo.
+
+### Reste à faire (ajouts de ce temps)
+- **`landing-desk-start.mp4` à fournir** (Adrien). En attendant, desktop joue la portrait recadrée : vérifié en 1440×900, **c'est très zoomé et visiblement mou** (720 px étirés au double), la lanterne et les bougies sortent du cadre. Passable en provisoire, pas tenable. Une seule ligne à changer une fois le fichier déposé (`START_VIDEO` → choix par viewport, comme `LandingVideo`).
+- **Contrôle sur téléphone réel** : la cérémonie dure ~7 s au total. À juger à l'usage — c'est agréable la première fois, la question est la dixième.
+- Sur mobile il n'y a pas de survol : le préchargement ne dispose que des 450 ms d'effacement. À surveiller en 4G.
+
+### Décisions
+- **La vidéo joue aussi quand on est déjà connecté** (choix d'Adrien) : c'est un rituel d'entrée, pas une récompense de première connexion.
+- **Audio retiré.** Lecture muette de toute façon, et un son surprise à l'entrée serait hostile.
+- **Réencodage plutôt que l'original.** Arbitrage mesuré, pas supposé : à l'échelle d'affichage réelle, 916 Ko et 2 Mo sont indiscernables.
+
 ## Reste à faire
 - **Reporter `AUTH_SECRET` sur Vercel** (scope Production) puis redéployer. Variable lue à l'exécution, pas inlinée. **Effet de bord : invalide tous les cookies `app_auth` émis**, chacun se reconnecte une fois.
 - **Sécurité de `loginAppAction`**, non traitée, à arbitrer si l'app s'ouvre au-delà de la table :

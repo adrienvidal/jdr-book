@@ -1,6 +1,5 @@
 "use server";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { checkPassword, COOKIE_NAME, signSession } from "@/lib/auth";
 
 async function setSessionCookie() {
@@ -16,7 +15,10 @@ async function setSessionCookie() {
 
 // Action de la modale de la landing (useActionState) : en cas d'échec on
 // reste sur place avec un état d'erreur au lieu de rediriger.
-export type LoginState = { error: boolean };
+// En cas de succès on ne redirige pas non plus — le cookie est posé, et c'est
+// LandingEnter qui décide de la suite : la vidéo d'ouverture se joue d'abord,
+// puis le client navigue vers /table.
+export type LoginState = { error: boolean; ok?: boolean };
 
 export async function loginAppAction(
   _prev: LoginState,
@@ -25,5 +27,5 @@ export async function loginAppAction(
   const password = String(formData.get("password") ?? "");
   if (!checkPassword(password)) return { error: true };
   await setSessionCookie();
-  redirect("/table");
+  return { error: false, ok: true };
 }

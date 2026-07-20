@@ -13,8 +13,11 @@ export default async function Home() {
   const [characters, campaign] = await Promise.all([listCharacters(), getCampaign()]);
   const empty = characters.length === 0;
 
+  // Le contenu monte en fondu : à l'arrivée depuis la landing, le voile de
+  // sortie est du même parchemin que ce fond, si bien que la table se pose
+  // dans la continuité de la vidéo au lieu d'apparaître d'un coup.
   return (
-    <main className="min-h-screen p-4 sm:p-8 md:p-10 max-w-5xl mx-auto">
+    <main className="animate-in fade-in duration-500 min-h-screen p-4 sm:p-8 md:p-10 max-w-5xl mx-auto">
       <header className="flex flex-wrap items-end justify-between gap-4 mb-6 sm:mb-8 border-b border-line pb-4 sm:pb-5">
         {/* Le wordmark ramène à l'écran de démarrage (convention : le logo est
             le lien d'accueil). La session est conservée — la landing détecte le

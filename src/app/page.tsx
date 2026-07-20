@@ -1,12 +1,12 @@
 import { cookies } from "next/headers";
 import { COOKIE_NAME, verifySession } from "@/lib/auth";
-import { LandingStart } from "@/components/LandingStart";
+import { LandingEnter } from "@/components/LandingEnter";
 import { LandingVideo } from "@/components/LandingVideo";
 
 // Landing publique — écran de démarrage façon jeu vidéo.
 // Route publique. On lit le cookie de session juste pour personnaliser le
-// bouton « Commencer » : connecté → entrée directe vers /table ; sinon → la
-// modale de mot de passe s'ouvre sur place (voir LandingStart).
+// bouton « Commencer » : connecté → la vidéo d'ouverture part au clic ; sinon
+// → la modale de mot de passe s'ouvre sur place (voir LandingEnter).
 // `?login=1` (posé par le middleware ou /login pour les deep links) ouvre la
 // modale automatiquement.
 export default async function Landing({
@@ -55,26 +55,10 @@ export default async function Landing({
           Carnet de campagne
         </p>
 
+        {/* Bouton + signature : LandingEnter les tient ensemble parce que la
+            cérémonie d'entrée les efface d'un seul geste avant la vidéo. */}
         <div className="animate-in fade-in slide-in-from-bottom-2 delay-300 fill-mode-backwards duration-700 mt-auto">
-          <LandingStart authed={authed} openLogin={!!login} />
-          {/* Signature discrète : assez lisible pour être lue, assez effacée
-              pour ne pas disputer l'attention au bouton juste au-dessus.
-              Opacité mesurée sur le rendu réel, pas calculée : à 11 px
-              l'antialiasing dilue les glyphes, si bien que le contraste perçu
-              tombe bien sous le calcul théorique (/55 calculait 5,0:1 mais ne
-              mesurait que 3,66:1 à l'écran). /70 est l'opacité qui passe AA
-              une fois rendue. Baisser cette valeur redemande une mesure. */}
-          <p className="mt-6 text-[11px] tracking-wide text-parch/70">
-            Site réalisé par{" "}
-            <a
-              href="https://viloris.io"
-              target="_blank"
-              rel="noreferrer"
-              className="focus-ring-parch rounded-sm underline underline-offset-2 transition-colors hover:text-parch"
-            >
-              Viloris.io
-            </a>
-          </p>
+          <LandingEnter authed={authed} openLogin={!!login} />
         </div>
       </div>
     </main>
