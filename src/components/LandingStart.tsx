@@ -18,7 +18,12 @@ import { SubmitButton } from "@/components/SubmitButton";
 // `focus-ring-parch` : le bouton est rouille sur une scène nocturne, et
 // l'anneau de focus par défaut est rouille lui aussi — invisible des deux
 // côtés du bord. Sur la landing seulement, l'anneau passe au parchemin.
-const START_CLASSES = "focus-ring-parch px-10 py-6 text-lg shadow-xl shadow-black/40";
+// `h-14` explicite : `size="lg"` pose `h-9` et l'ancien `py-6` posait une
+// hauteur concurrente, la taille rendue ne tenait qu'à l'ordre des classes.
+// Une seule source de hauteur, et 56px passent la cible tactile de 44px.
+// Le relief et l'ombre viennent de `.btn-wax` (voir globals.css).
+const START_CLASSES =
+  "btn-wax focus-ring-parch h-14 px-10 text-lg tracking-[0.04em] focus-visible:ring-parch/40";
 
 // Bouton « Commencer » de la landing.
 // - Déjà connecté : lien direct vers /table (entrée immédiate).
