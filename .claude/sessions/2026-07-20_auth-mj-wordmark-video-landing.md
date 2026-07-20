@@ -128,7 +128,7 @@ Poussé sur `origin/main` (`d2c4a34..ad0b3ed`, 4 commits) et déployé. Prod vé
 - Repris de plus haut, toujours ouvert : **`AUTH_SECRET` sur Vercel** + redéploiement ; **limitation de tentatives sur `loginAppAction`** ; manifest PWA ; `autoComplete` sur la modale.
 - ~~**Contrôle non fait, à faire par Adrien** : netteté sur téléphone réel et son au clic~~ — **fait, validé par Adrien sur téléphone.** La chaîne d'encodage est donc confirmée sur le terrain : **CRF 28, sans `unsharp`, résolution native 716×1284, un seul fichier**. Ne pas la durcir spontanément — c'est mesuré *et* vérifié en usage réel, contrairement à la landing où le flou n'était apparu qu'à ce stade.
 - Si le casting grandit : **basculer les vidéos vers le bucket Supabase** comme les portraits, plutôt que d'alourdir l'historique git.
-- Non traité, écarté par Adrien : **lecture en plein écran** au clic sur Play.
+- ~~Non traité, écarté par Adrien : **lecture en plein écran** au clic sur Play.~~ — **repris et fait au 4e temps**, sous forme de modale embarquée. L'argument d'agrandissement qui l'avait écarté n'a pas disparu, il a été accepté.
 - Non traité : **vignettes animées dans la grille `/mj`** (plusieurs vidéos simultanées).
 
 ## Blockers
@@ -149,3 +149,50 @@ Poussé sur `origin/main` (`d2c4a34..ad0b3ed`, 4 commits) et déployé. Prod vé
 - **Attention aux mesures prises entre deux appels lents.** Deux captures « en cours de lecture » montraient en fait l'état de repos : le clip de 10 s s'était terminé entre mes commandes. Rendre l'opération atomique (`evaluate` unique qui attend l'événement) au lieu d'enchaîner des appels.
 - **Remettre en état une donnée touchée par un test.** J'ai incrémenté la fatigue de Coltar pour forcer un rendu React ; remise à 0 **et vérifiée en base**, pas seulement à l'écran.
 - **Corriger un commentaire devenu faux au même titre que du code.** « Vérifié sur les quatre vidéos » après en avoir ajouté une cinquième est une dette, pas un détail.
+
+---
+
+# 4e temps de la journée — Hauteur du hero MJ, lecture en grand
+
+Poussé sur `origin/main` (`4b6a0bd..5d1922e`, 2 commits).
+
+## Réalisé
+
+### Hero de `/mj` à la hauteur des fiches (`2fffb42`)
+- `/mj` était en `24/28 rem` là où une fiche personnage est en `26/30 rem`. Aligné. Tout le contenu du hero étant positionné en absolu, rien d'autre à toucher.
+- À noter : c'est cette hauteur plus courte qui avait rendu le bouton inerte hier (le dégradé du bas remontait jusqu'à lui). Le `z-10` reste nécessaire — il ne dépendait pas de la hauteur, seulement de l'ordre dans le DOM.
+
+### Lecture en grand dans une modale embarquée (`5d1922e`)
+- **Revirement assumé** : le plein écran avait été écarté hier sur l'argument de l'agrandissement (1,4×–2,0×). Adrien l'a redemandé, puis a préféré une **modale embarquée** au plein écran natif.
+- **Modale plutôt que plein écran natif** : l'habillage reste celui de l'app et le comportement est identique partout, là où iOS remplace la page par un lecteur système. Le plein écran natif avait d'abord été implémenté et vérifié (il marchait, `requestFullscreen` + `webkitEnterFullscreen`) avant d'être remplacé.
+- **La modale a sa propre balise vidéo.** React ne peut pas transporter un nœud d'un parent à l'autre sans le remonter, ce qui couperait la lecture. Le fichier étant déjà en cache après l'ouverture de la fiche, ce second élément ne coûte pas un téléchargement.
+- Ouvrir la modale **remet le hero au repos** (deux lectures décalées du même clip, l'une muette, n'ont aucun intérêt). La fin du clip referme la modale.
+- **Bâtie sur le `Dialog` Radix déjà présent** (`components/ui/dialog.tsx`) : Échap, focus trap, scroll lock, portail — rien de réécrit.
+
+### Deux défauts trouvés en mesurant, corrigés
+- **La vidéo débordait de la fenêtre** : dans la grille par défaut de `DialogContent`, le `max-h-full` de la vidéo se résout contre une piste dimensionnée par son contenu et ne contraint rien. Mesuré : 1284 px de haut pour 862 disponibles. Passé en `flex` → 481×862.
+- **Le `×` de fermeture était invisible** : celui de `DialogContent` est gris à 70 % d'opacité, pensé pour un fond de carte clair, pas pour une vidéo sombre. Remplacé par un bouton contrasté du même style que celui du hero (`showClose={false}`).
+
+### Vérifs
+`tsc` + `next build` verts, **12/12 vitest**, 0 erreur console. Navigateur sur le **build de prod**, desktop 1512×862 et mobile 390×844, sur `/mj` et sur une fiche : bonne vidéo par page (contrôlée contre le nom affiché), cadrage tenu dans les deux formats, fermeture par **Échap / bouton / fin du clip** — les trois rendent le scroll et repassent au portrait fixe —, `main` masqué aux lecteurs d'écran pendant l'ouverture, **une seule `<video>` restante** dans le DOM après fermeture.
+
+## Reste à faire
+- Repris des temps précédents, toujours ouvert : **`AUTH_SECRET` sur Vercel** + redéploiement ; **limitation de tentatives sur `loginAppAction`** ; manifest PWA ; `autoComplete` sur la modale de login.
+- **Contrôle non fait, à faire par Adrien : netteté de la vidéo dans la modale sur téléphone réel.** Elle y est agrandie **~1,6×** (390 px CSS = 1170 px physiques en DPR 3, pour une source de 716), contre 0,97× au pire dans le hero. C'est exactement le facteur qui avait fait écarter le plein écran. **Si ça pique, la réponse est de réencoder en résolution supérieure, pas de retoucher le CSS** — l'encodage actuel n'a aucune marge à cette échelle.
+- Si le casting grandit : **basculer les vidéos vers le bucket Supabase** plutôt que d'alourdir l'historique git.
+- Non traité : **vignettes animées dans la grille `/mj`** (plusieurs vidéos simultanées).
+
+## Blockers
+- Aucun.
+
+## Décisions
+- **Modale embarquée plutôt que plein écran natif.** Choix d'Adrien. Rendu cohérent avec l'app et identique sur tous les navigateurs ; on renonce à la rotation automatique et aux gestes système.
+- **Deux balises vidéo plutôt qu'un déplacement de nœud.** Contrainte de React, pas une préférence.
+- **La fin du clip referme la modale.** Cohérent avec le hero, où la fin ramène au portrait fixe.
+- **L'agrandissement sur mobile est accepté par défaut, pas mesuré comme acceptable.** À trancher après contrôle sur téléphone.
+
+## Leçons de méthode (pour les prochaines fois)
+- **Une capture d'écran peut arriver après que l'état a disparu.** Ma première capture de la modale montrait la page sans modale : le clip de 10 s s'était terminé entre le clic et la capture, et la fermeture automatique avait fait son travail. **Même piège qu'hier** avec les deux captures « en cours de lecture ». Réflexe à prendre : figer l'état (`pause()`) avant de capturer, ou rendre l'opération atomique.
+- **Un défaut de mise en page ne se voit pas dans le DOM, il se mesure.** La vidéo débordait de 422 px en hauteur ; tous les attributs étaient corrects et la balise était bien là. C'est `getBoundingClientRect` comparé à la fenêtre qui l'a montré, pas l'inspection de la structure.
+- **Un composant partagé porte les hypothèses de son premier usage.** Le `×` de `DialogContent` était réglé pour la modale de login, sur fond de carte clair. Réutiliser le composant sur fond sombre ne suffisait pas ; il fallait vérifier le contraste dans le nouveau contexte.
+- **Un arbitrage tranché hier peut être rouvert demain, et c'est normal.** Le plein écran avait été écarté avec de bons arguments, mesurés. Ils n'ont pas cessé d'être vrais : Adrien a choisi d'en payer le prix. Noter le revirement **et** ce qui reste vrai de l'argument d'origine, plutôt que d'effacer l'un ou l'autre.
