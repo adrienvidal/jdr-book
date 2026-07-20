@@ -126,7 +126,7 @@ Poussé sur `origin/main` (`d2c4a34..ad0b3ed`, 4 commits) et déployé. Prod vé
 
 ## Reste à faire
 - Repris de plus haut, toujours ouvert : **`AUTH_SECRET` sur Vercel** + redéploiement ; **limitation de tentatives sur `loginAppAction`** ; manifest PWA ; `autoComplete` sur la modale.
-- **Contrôle non fait, à faire par Adrien** : netteté sur téléphone réel et son au clic. Les mesures ne remplacent ni l'un ni l'autre — c'est sur téléphone que le flou de la landing était apparu.
+- ~~**Contrôle non fait, à faire par Adrien** : netteté sur téléphone réel et son au clic~~ — **fait, validé par Adrien sur téléphone.** La chaîne d'encodage est donc confirmée sur le terrain : **CRF 28, sans `unsharp`, résolution native 716×1284, un seul fichier**. Ne pas la durcir spontanément — c'est mesuré *et* vérifié en usage réel, contrairement à la landing où le flou n'était apparu qu'à ce stade.
 - Si le casting grandit : **basculer les vidéos vers le bucket Supabase** comme les portraits, plutôt que d'alourdir l'historique git.
 - Non traité, écarté par Adrien : **lecture en plein écran** au clic sur Play.
 - Non traité : **vignettes animées dans la grille `/mj`** (plusieurs vidéos simultanées).
