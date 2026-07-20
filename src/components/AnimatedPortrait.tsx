@@ -138,7 +138,11 @@ export function AnimatedPortrait({
               : "Activer le son"
             : `Rejouer le portrait animé de ${alt}, avec le son`
         }
-        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-3 text-parch backdrop-blur-sm transition hover:bg-black/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-parch/70 sm:right-6"
+        // `z-10` n'est pas décoratif : les dégradés du hero sont posés après ce
+        // bouton dans le DOM et interceptent le pointeur. Sans ça, le bouton
+        // reste visible mais devient inerte dès que le hero est assez court
+        // pour que le dégradé du bas remonte jusqu'à lui — c'est le cas de /mj.
+        className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/40 p-3 text-parch backdrop-blur-sm transition hover:bg-black/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-parch/70 sm:right-6"
       >
         {enLecture ? (
           sonActif ? (

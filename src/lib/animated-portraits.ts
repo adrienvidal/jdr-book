@@ -32,3 +32,11 @@ export const ANIMATED_PORTRAITS: Record<string, string> = {
   // Lotus
   cmrrw1hu100010neebdxc4pyv: "/portraits/lotus.mp4",
 };
+
+// Même chose pour le visuel du meneur de jeu, sur /mj. Table distincte parce
+// que la clé l'est : le hero de /mj est piloté par la campagne, pas par un
+// personnage. Une seule campagne existe aujourd'hui (« main »), mais la clé
+// évite de coder en dur une hypothèse qui n'est pas dans le schéma.
+export const ANIMATED_MJ_PORTRAITS: Record<string, string> = {
+  main: "/portraits/gamemaster.mp4",
+};

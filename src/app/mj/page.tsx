@@ -7,6 +7,8 @@ import { listNotes } from "@/app/actions/notes";
 import { uploadMjPortrait } from "@/app/actions/upload";
 import { usedSlots } from "@/lib/inventory";
 import { cn } from "@/lib/utils";
+import { AnimatedPortrait } from "@/components/AnimatedPortrait";
+import { ANIMATED_MJ_PORTRAITS } from "@/lib/animated-portraits";
 import { MjNotes } from "@/components/MjNotes";
 import { MjTitleInput } from "@/components/MjTitleInput";
 import { PortraitUpload } from "@/components/PortraitUpload";
@@ -25,6 +27,7 @@ export default async function MjPage() {
     getCampaign(),
   ]);
 
+  const mjAnimatedSrc = ANIMATED_MJ_PORTRAITS[campaign.id];
   const nbCharacters = characters.length;
   const nbNotes = notes.length;
   const nbExhausted = characters.filter((c) => c.epuise).length;
@@ -45,17 +48,25 @@ export default async function MjPage() {
         />
         <div className="absolute inset-0 bg-black/15" />
 
-        {/* Portrait net, centré */}
-        <div className="absolute inset-y-0 left-1/2 aspect-[9/16] -translate-x-1/2">
-          <Image
-            src={campaign.mjImageUrl || "/default-character.webp"}
+        {/* Portrait net, centré — animé si la campagne a une vidéo */}
+        {mjAnimatedSrc ? (
+          <AnimatedPortrait
+            videoSrc={mjAnimatedSrc}
+            imageUrl={campaign.mjImageUrl || "/default-character.webp"}
             alt="Meneur de jeu"
-            fill
-            priority
-            sizes="(max-width: 640px) 60vw, 280px"
-            className="object-cover sepia-[.08]"
           />
-        </div>
+        ) : (
+          <div className="absolute inset-y-0 left-1/2 aspect-[9/16] -translate-x-1/2">
+            <Image
+              src={campaign.mjImageUrl || "/default-character.webp"}
+              alt="Meneur de jeu"
+              fill
+              priority
+              sizes="(max-width: 640px) 60vw, 280px"
+              className="object-cover sepia-[.08]"
+            />
+          </div>
+        )}
 
         {/* Barre du haut : Accueil */}
         <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-black/55 to-transparent">
