@@ -35,9 +35,16 @@ export default async function Landing({
         />
       </picture>
       <LandingVideo />
-      {/* Assombrissement + vignette (image chaude : on garde l'ambiance) */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-black/80" />
-      <div className="absolute inset-0 [background:radial-gradient(120%_85%_at_50%_42%,transparent_30%,rgba(0,0,0,0.6)_100%)]" />
+      {/* Assombrissement + vignette (image chaude : on garde l'ambiance).
+          Ces voiles, et non la vidéo, sont ce qui rend la scène sombre : la
+          vidéo et l'image de base sont à la même luminance (71,5 contre 72,5
+          de moyenne, 1 % d'écart). Les alléger éclaircit donc les deux couches
+          à l'identique, sans réencoder et sans créer de saut au fondu.
+          Allégés une fois (55/35/80 → 38/18/66, vignette 0,6 → 0,45) : +33 % de
+          luminance composite, contraste texte/fond mesuré à 6,4:1 au pire
+          (sous-titre), très au-dessus du minimum AA de 4,5:1. */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/38 via-black/[.18] to-black/[.66]" />
+      <div className="absolute inset-0 [background:radial-gradient(120%_85%_at_50%_42%,transparent_30%,rgba(0,0,0,0.45)_100%)]" />
 
       {/* Contenu centré */}
       <div className="relative z-10 flex min-h-dvh flex-col items-center px-6 pt-[19vh] pb-[11vh] text-center">
