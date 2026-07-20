@@ -4,6 +4,7 @@ import { Plus, Shield, UserPlus } from "lucide-react";
 import { listCharacters } from "@/app/actions/characters";
 import { getCampaign } from "@/app/actions/campaign";
 import { Button } from "@/components/ui/button";
+import { CardLoader } from "@/components/CardLoader";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "La table" };
@@ -69,6 +70,7 @@ export default async function Home() {
                     {c.name || "Sans nom"}
                   </span>
                 </div>
+                <CardLoader />
               </Link>
             ))}
           </div>
@@ -103,6 +105,9 @@ export default async function Home() {
                 Meneur de jeu
               </span>
             </div>
+            {/* Posé en haut à GAUCHE dans toutes les cartes : c'est le seul coin
+                libre ici, l'écusson du meneur occupant déjà la droite. */}
+            <CardLoader />
           </Link>
         </div>
       </section>
