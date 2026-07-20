@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Play, Volume2, VolumeX } from "lucide-react";
+import { Play, Volume2, VolumeX, X } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 // Portrait animé du hero de fiche : la vidéo se joue une fois à l'ouverture,
 // puis se fond vers le portrait fixe, qui reste l'état de repos.
@@ -34,6 +35,17 @@ import { Play, Volume2, VolumeX } from "lucide-react";
 // À LA FIN, fondu long. Les clips terminent loin de leur portrait (10 à 14 dB),
 // souvent sur un gros plan où le personnage n'est plus reconnaissable. Sans
 // fondu, la fiche resterait figée sur cette image.
+//
+// GRAND FORMAT À LA DEMANDE. La lecture d'ouverture reste dans le hero ; un clic
+// sur Play ouvre une modale embarquée qui rejoue le clip en grand, avec le son
+// et des contrôles. Modale et non plein écran natif : l'habillage reste celui de
+// l'app, et le comportement est identique sur tous les navigateurs — le plein
+// écran natif d'iOS remplace la page par un lecteur système.
+//
+// La modale a SA PROPRE balise vidéo, plutôt que de déplacer celle du hero :
+// React ne peut pas transporter un nœud d'un parent à l'autre sans le remonter,
+// ce qui couperait la lecture. Le fichier étant déjà en cache après l'ouverture,
+// ce second élément ne coûte pas un téléchargement.
 type Phase = "hidden" | "playing" | "fading";
 
 export function AnimatedPortrait({
@@ -48,6 +60,7 @@ export function AnimatedPortrait({
   const ref = useRef<HTMLVideoElement>(null);
   const [phase, setPhase] = useState<Phase>("hidden");
   const [sonActif, setSonActif] = useState(false);
+  const [modale, setModale] = useState(false);
 
   // La source n'est posée qu'au moment de lire : sous mouvement réduit et tant
   // que personne n'a cliqué, aucun octet n'est téléchargé.
@@ -72,6 +85,19 @@ export function AnimatedPortrait({
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     lire(false);
   }, [lire]);
+
+  // Ouvrir la modale remet le hero au repos : deux lectures simultanées du même
+  // clip, décalées et l'une muette, n'ont aucun intérêt.
+  const ouvrirModale = () => {
+    const video = ref.current;
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
+    }
+    setPhase("hidden");
+    setSonActif(false);
+    setModale(true);
+  };
 
   const basculerSon = () => {
     const video = ref.current;
@@ -130,13 +156,13 @@ export function AnimatedPortrait({
           repos elle relance, en lecture elle pilote le son. */}
       <button
         type="button"
-        onClick={enLecture ? basculerSon : () => lire(true)}
+        onClick={enLecture ? basculerSon : ouvrirModale}
         aria-label={
           enLecture
             ? sonActif
               ? "Couper le son"
               : "Activer le son"
-            : `Rejouer le portrait animé de ${alt}, avec le son`
+            : `Voir le portrait animé de ${alt} en grand, avec le son`
         }
         // `z-10` n'est pas décoratif : les dégradés du hero sont posés après ce
         // bouton dans le DOM et interceptent le pointeur. Sans ça, le bouton
@@ -154,6 +180,47 @@ export function AnimatedPortrait({
           <Play className="size-5 fill-current" />
         )}
       </button>
+
+      <Dialog open={modale} onOpenChange={setModale}>
+        {/* La modale occupe la fenêtre entière et laisse la vidéo se dimensionner
+            seule en `object-contain` : le clip est vertical (9/16) et serait rogné
+            par n'importe quel cadre imposé. Fond transparent et sans bordure — le
+            voile de l'overlay suffit, un cadre autour d'une vidéo verticale ne
+            ferait qu'ajouter des bandes. */}
+        {/* `flex` et non la grille par défaut de DialogContent : dans une grille
+            à pistes automatiques, le `max-h-full` de la vidéo se résout contre
+            une piste dimensionnée par son contenu et ne contraint donc rien —
+            mesuré, le clip débordait de la fenêtre en hauteur. */}
+        <DialogContent
+          className="flex h-dvh w-screen max-w-none items-center justify-center border-0 bg-transparent p-0 shadow-none"
+          // Fermeture maison : celle de DialogContent est un × gris à 70 %
+          // d'opacité, pensé pour un fond de carte clair. Sur une vidéo sombre
+          // il disparaît.
+          showClose={false}
+        >
+          <DialogTitle className="sr-only">Portrait animé de {alt}</DialogTitle>
+          <button
+            type="button"
+            onClick={() => setModale(false)}
+            aria-label="Fermer"
+            className="absolute right-3 top-3 z-10 rounded-full bg-black/40 p-3 text-parch backdrop-blur-sm transition hover:bg-black/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-parch/70 sm:right-6 sm:top-6"
+          >
+            <X className="size-5" />
+          </button>
+          {modale && (
+            <video
+              src={videoSrc}
+              autoPlay
+              controls
+              playsInline
+              // Le clic vient d'un geste utilisateur : la lecture sonore ne peut
+              // pas être bloquée ici, contrairement à l'ouverture de la fiche.
+              onEnded={() => setModale(false)}
+              className="max-h-full max-w-full object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
