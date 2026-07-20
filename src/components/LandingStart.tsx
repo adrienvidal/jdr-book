@@ -15,7 +15,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/SubmitButton";
 
-const START_CLASSES = "px-10 py-6 text-lg shadow-xl shadow-black/40";
+// `focus-ring-parch` : le bouton est rouille sur une scène nocturne, et
+// l'anneau de focus par défaut est rouille lui aussi — invisible des deux
+// côtés du bord. Sur la landing seulement, l'anneau passe au parchemin.
+const START_CLASSES = "focus-ring-parch px-10 py-6 text-lg shadow-xl shadow-black/40";
 
 // Bouton « Commencer » de la landing.
 // - Déjà connecté : lien direct vers /table (entrée immédiate).

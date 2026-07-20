@@ -90,12 +90,43 @@
     outline-offset: 2px;
   }
 
+  /* tw-animate-css n'embarque aucun garde-fou : sans ceci, les entrées
+     échelonnées de la landing s'exécutent en entier pour qui a demandé moins
+     de mouvement. On atterrit sur l'état final immédiatement — le délai est
+     neutralisé aussi, sinon `fill-mode-backwards` retient l'élément invisible
+     pendant toute sa durée d'attente. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
 
   html {
     @apply font-sans;
+  }
+}
+
+/* Anneau de focus pour les surfaces sombres (landing). L'anneau rouille par
+   défaut n'y mesure que 2,27:1, sous le minimum WCAG non-texte de 3:1 : il est
+   taillé pour le parchemin, pas pour une scène nocturne. Le parch y mesure
+   13,4:1.
+   Doit vivre dans `utilities`, pas dans `base` : la règle `*` du base applique
+   `outline-ring/50` depuis la couche utilities, qui gagne sur toute règle de
+   base quelle que soit sa spécificité. Placée dans base, cette classe est
+   silencieusement écrasée (vérifié : l'anneau restait rouille). */
+@layer utilities {
+  .focus-ring-parch:focus-visible {
+    outline-color: var(--color-parch);
   }
 }
 

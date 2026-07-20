@@ -43,7 +43,7 @@ export default async function Landing({
           Allégés une fois (55/35/80 → 38/18/66, vignette 0,6 → 0,45) : +33 % de
           luminance composite, contraste texte/fond mesuré à 6,4:1 au pire
           (sous-titre), très au-dessus du minimum AA de 4,5:1. */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/38 via-black/[.18] to-black/[.66]" />
+      <div className="absolute inset-0 bg-linear-to-b from-black/38 via-black/18 to-black/66" />
       <div className="absolute inset-0 [background:radial-gradient(120%_85%_at_50%_42%,transparent_30%,rgba(0,0,0,0.45)_100%)]" />
 
       {/* Contenu centré */}
@@ -57,6 +57,24 @@ export default async function Landing({
 
         <div className="animate-in fade-in slide-in-from-bottom-2 delay-300 fill-mode-backwards duration-700 mt-auto">
           <LandingStart authed={authed} openLogin={!!login} />
+          {/* Signature discrète : assez lisible pour être lue, assez effacée
+              pour ne pas disputer l'attention au bouton juste au-dessus.
+              Opacité mesurée sur le rendu réel, pas calculée : à 11 px
+              l'antialiasing dilue les glyphes, si bien que le contraste perçu
+              tombe bien sous le calcul théorique (/55 calculait 5,0:1 mais ne
+              mesurait que 3,66:1 à l'écran). /70 est l'opacité qui passe AA
+              une fois rendue. Baisser cette valeur redemande une mesure. */}
+          <p className="mt-6 text-[11px] tracking-wide text-parch/70">
+            Site réalisé par{" "}
+            <a
+              href="https://viloris.io"
+              target="_blank"
+              rel="noreferrer"
+              className="focus-ring-parch rounded-sm underline underline-offset-2 transition-colors hover:text-parch"
+            >
+              Viloris.io
+            </a>
+          </p>
         </div>
       </div>
     </main>
