@@ -254,3 +254,60 @@ Poussé sur `origin/main` (`b763863..9afd47b`, 4 commits).
 - **Un test qui ne peut pas échouer ne teste rien.** Le témoin de chargement n'apparaît jamais sur une navigation locale non bridée. Sans latence émulée, j'aurais « vérifié » un composant invisible et conclu à tort. Même famille que le Chromium de Playwright lancé avec `--autoplay-policy=no-user-gesture-required` hier.
 - **Vérifier aussi le cas inverse.** Le témoin devait apparaître sur navigation lente *et* rester invisible sur navigation rapide. Le second cas est celui qui aurait produit un clignotement en usage réel, et il ne se voit pas si on ne teste que le premier.
 - **Contrôler la portée d'un état partagé en le déclenchant hors du premier élément.** Cliquer la 1re carte n'aurait pas distingué « état par carte » de « état global » : c'est en cliquant la 3e qu'on le prouve.
+
+---
+
+# 6e temps de la journée — Signature Viloris, accessibilité de la landing, bouton en cire
+
+Poussé sur `origin/main` (`17a14a9..9a3f9d1`, 2 commits).
+
+> **Note d'historique** : `3b3c04b` a été commité par Adrien lui-même en cours de session (16h05), pas par l'assistant. Il est **libellé en anglais** alors que tout le reste de l'historique est en français — à reformuler si la cohérence compte (déjà poussé, demanderait un `push --force`).
+
+## Réalisé
+
+### Signature « Site réalisé par Viloris.io » (`3b3c04b`)
+- Placée **sur la landing uniquement**, sous le bouton « Commencer ». Les autres pages (table, fiche, MJ) sont des outils de jeu : une signature y ferait tache.
+- **L'opacité a demandé deux mesures et le calcul s'est trompé les deux fois.** `parch/40` (proposé d'emblée) donnait 3,2:1. Corrigé en `/55`, qui **calculait 5,0:1 mais ne mesurait que 3,66:1 à l'écran**. Retenu : `/70`, mesuré à **4,99:1**.
+- Cause de l'écart : **à 11 px l'antialiasing dilue les glyphes**, qui n'atteignent jamais la couleur pleine. Le calcul théorique surestime d'environ 1,4 point à cette taille.
+- Erreur d'échantillonnage au passage : la première mesure visait le fond sombre, alors que **le texte tombe en fait sur la page du grimoire**. Seule la capture d'écran l'a montré.
+
+### Accessibilité de la landing (`3b3c04b`)
+- **Anneau de focus invisible.** Le lien Viloris est focusable ; l'anneau global est rouille (`--ring`), calibré pour le fond parchemin. Sur la scène nocturne il mesure **2,27:1**, sous le minimum WCAG non-texte de 3:1. Pire pour le bouton : rouille sur bouton rouille. Classe `focus-ring-parch` sur la landing seulement → **13,4:1**.
+- **Contrainte de couche, non devinable** : la règle doit vivre dans `@layer utilities`. Placée dans `base`, elle est silencieusement écrasée par le `* { outline-ring/50 }` que Tailwind émet en `utilities`. Noté en commentaire dans `globals.css`.
+- **Aucun garde-fou `prefers-reduced-motion`** sur les entrées de la landing : `tw-animate-css` n'en embarque pas (vérifié dans le paquet). `LandingVideo` et `AnimatedPortrait` gèrent le cas en JS, mais les trois entrées échelonnées s'exécutaient en entier. Garde-fou **global** ajouté ; mesuré sous `reducedMotion: reduce` à 120 ms : opacité 1, aucune transform.
+- Le `animation-delay` est neutralisé **en plus** de la durée : sinon `fill-mode-backwards` retient l'élément invisible pendant toute son attente.
+
+### Bouton « Commencer » en cire pressée (`9a3f9d1`)
+- **L'ombre ignorait la lumière de la scène.** Elle tombait droit (`0 20px 25px`) alors que la lanterne et la bougie éclairent depuis la gauche (**luminance mesurée dans l'image : 72,7 gauche / 83,8 centre / 43,6 droite**). C'est ce qui le faisait flotter au-dessus du décor. Biseau allumé en haut-à-gauche, ombre qui fuit vers la droite.
+- **Le survol effaçait le bouton** : `hover:bg-primary/80` le pâlissait *vers le fond*, au moment précis où on le visait. Désormais la cire prend la lumière et se décolle ; le clic l'enfonce et rétracte l'ombre.
+- **Deux hauteurs concurrentes** : `size="lg"` posait `h-9`, `START_CLASSES` posait `py-6` — la taille rendue ne tenait qu'à l'ordre des classes. `h-14` explicite, et 56 px passent la cible tactile de 44 px (les 50 px précédents ne passaient que de justesse).
+- Pas de `border` : le relief vient uniquement d'ombres internes, pour ne pas retomber sur le filet-plus-halo du bouton générique.
+- Libellé mesuré à **5,29:1** sur le dégradé — qui s'assombrit vers le bas-droit, c'était là le risque.
+
+### Vérifs
+`tsc` + `next build` verts, **12/12 vitest**. Navigateur en desktop 1440×900 et mobile 390×844. Les trois états du bouton (repos / survol / enfoncé) **lus sur le style calculé**, pas supposés : `translateY(2px)` gagne bien la cascade malgré le `active:` concurrent du composant shadcn.
+
+## Reste à faire
+- Repris des temps précédents, toujours ouvert : **`AUTH_SECRET` sur Vercel** + redéploiement ; **limitation de tentatives sur `loginAppAction`** ; manifest PWA ; `autoComplete` sur la modale de login.
+- Toujours ouverts, contrôles sur téléphone réel : netteté de la vidéo **dans la modale** (si ça pique, réencoder en résolution supérieure, pas retoucher le CSS) ; **landing éclaircie** (les écrans de téléphone sont plus lumineux, le réglage peut y paraître délavé).
+- **Deux arbitrages du bouton, non tranchés** : (1) intensité du reflet chaud — si le rendu est trop matiéré, la variable à baisser est le premier `inset` de `.btn-wax` (`0.3` au repos) ; (2) le bouton « Entrer » de la modale de connexion est resté standard, donc les deux boutons du parcours ne se ressemblent pas.
+- **Commit `3b3c04b` libellé en anglais** — à reformuler ou à laisser, au choix.
+- Si le casting grandit : **basculer les vidéos vers le bucket Supabase**.
+- Non traité : **vignettes animées dans la grille `/mj`**.
+- Toujours devant : Lot 3 (session live / dés), Lot 4 (prépa MJ), Lot 5 (compendium SRD).
+
+## Blockers
+- Aucun.
+
+## Décisions
+- **Signature sur la landing seulement.** Les pages-outils restent des outils.
+- **Anneau de focus parchemin sur la landing, rouille ailleurs.** Un seul anneau ne peut pas servir un fond parchemin et une scène nocturne.
+- **Garde-fou reduced-motion global**, pas limité à la landing — à restreindre si ça gêne ailleurs.
+- **Bouton en matière plutôt qu'en correctifs seuls.** La landing est la surface d'identité ; un bouton shadcn par défaut y était le seul élément à dire « application web ».
+- **Commit direct sur `main`**, en suivant la convention du dépôt (Adrien venait d'y committer), plutôt qu'une branche non demandée.
+
+## Leçons de méthode (pour les prochaines fois)
+- **Le contraste calculé n'est pas le contraste rendu, en dessous d'une certaine taille.** À 11 px, l'antialiasing coûte ~1,4 point. `parch/55` a *passé* la vérification sur le papier avant d'échouer à l'écran. En petit corps, mesurer les pixels rendus, jamais la formule seule.
+- **Quand une correction ne prend pas, suspecter le test avant de re-corriger le code.** L'anneau de focus mesurait toujours rouille après un correctif pourtant valide : le lien porte `transition-colors`, qui transitionne `outline-color`, et la lecture se faisait à l'instant du Tab, soit au départ de la transition. Deux hypothèses concurrentes — CSS faux ou test faux — que seule **la lecture de la feuille réellement servie** a permis de départager.
+- **Les couches CSS battent la spécificité.** Une règle `base` perd contre une utilitaire Tailwind quelle que soit sa spécificité. Symptôme trompeur : la règle est bien présente dans le CSS livré, et pourtant sans effet.
+- **Vérifier l'état de git avant de committer, pas seulement le diff.** Un commit était apparu en cours de session sans que l'assistant l'ait fait ; s'y fier aveuglément aurait produit un message de commit décrivant du travail déjà parti.
