@@ -1,6 +1,7 @@
-# Session 2026-07-20 — Suppression auth MJ, retour accueil, vidéo de fond de la landing
+# Session 2026-07-20 — Journée landing (auth MJ, vidéos de fond, cérémonie d'ouverture, scène desk, son)
 
-Tout poussé sur `origin/main` (dernier commit `469b085`). `main` en sync.
+Journal multi-temps de la journée. **État final : tout poussé sur `origin/main`, dernier commit `5f8cb6c`, `main` en sync.** Clôture détaillée en fin de fichier.
+_(La ligne d'origine indiquait `469b085` — l'état de début de journée. Conservé pour mémoire ; le fil des « temps » ci-dessous suit la progression.)_
 
 ## Réalisé
 
@@ -389,3 +390,36 @@ Poussé sur `origin/main` (`17a14a9..9a3f9d1`, 2 commits).
 - **Quand une correction ne prend pas, suspecter le test avant de re-corriger le code.** L'anneau de focus mesurait toujours rouille après un correctif pourtant valide : le lien porte `transition-colors`, qui transitionne `outline-color`, et la lecture se faisait à l'instant du Tab, soit au départ de la transition. Deux hypothèses concurrentes — CSS faux ou test faux — que seule **la lecture de la feuille réellement servie** a permis de départager.
 - **Les couches CSS battent la spécificité.** Une règle `base` perd contre une utilitaire Tailwind quelle que soit sa spécificité. Symptôme trompeur : la règle est bien présente dans le CSS livré, et pourtant sans effet.
 - **Vérifier l'état de git avant de committer, pas seulement le diff.** Un commit était apparu en cours de session sans que l'assistant l'ait fait ; s'y fier aveuglément aurait produit un message de commit décrivant du travail déjà parti.
+
+---
+
+# Clôture 2026-07-20 (soir) — Cérémonie d'ouverture, scène desk, son
+
+État final : `origin/main` = `5f8cb6c`, `main` en sync. 5 commits poussés ce soir (`b4ada74..5f8cb6c`).
+
+## Réalisé (soir)
+- `e60f7e9` **Vidéo d'ouverture au clic sur « Commencer »** : bouton + signature s'effacent → vidéo plein cadre → fondu parchemin → `/table`. `LandingStart` → `LandingEnter`. `loginAppAction` renvoie `{ok:true}` au lieu de rediriger (la redirection serveur tuait la landing avant la vidéo). Le bug clé : la pose du cookie rafraîchit l'arbre RSC → `authed` bascule → la modale se démontait avec son signal de succès ; remonté `useActionState` + `wasAuthed` figé dans `LandingEnter`.
+- `92290c0` **Nouvelle scène desk** depuis `landing-desk3` (1924×1076). Boucle refaite (raccord 0,71×). **Résolution native suffit quand la source ≥ résolution d'affichage** (desk3 en 1924) ; l'upscale 2560 ne servait que pour desk2 (source 1284, sous le Retina). Base webp dérivée de la frame 0 (compositions image/vidéo fournies différentes → base = frame vidéo, fondu invisible).
+- `cc61ee1` **Vidéo d'ouverture paysage sur desktop** (`landing-desk-start`, provisoire portrait-recadrée levé). Source choisie par viewport dans `LandingEnter` comme `LandingVideo`. CRF 28 validé jusqu'au pic d'explosion (pas de banding).
+- `08d5c6d` **Titre calé** dans le vide de la scène desk : `sm:pt-[27vh]` (desktop), mobile intact à 19vh.
+- `5f8cb6c` **Son sur les vidéos d'ouverture** : audio remuxé sans réencoder ; `muted` retiré de la cérémonie (boucle de fond reste muette) ; repli muet si autoplay sonore refusé. Renverse la décision « audio retiré » du 7e temps.
+
+## Reste à faire (report — voir aussi les « Reste à faire » des temps précédents)
+- **`AUTH_SECRET` sur Vercel** (Production) + redéploiement — toujours ouvert depuis le matin.
+- **Limitation de tentatives sur `loginAppAction`** — toujours ouvert.
+- **Contrôle sur téléphone réel** (Adrien) : cérémonie ~7 s (agréable la 1re fois, à juger à la 10e) ; **niveau du son** des vidéos d'ouverture (mesuré modéré, mais à valider à l'oreille sur un vrai appareil) ; netteté générale.
+- **Vraie paire desk nette** si un jour souhaité : image au cadrage exact de la vidéo (aujourd'hui la base est une frame vidéo). Sources `docs/landing-desk.*` et `landing-desk2.*` obsolètes.
+- Optionnels traînants : manifest PWA, `autoComplete` sur la modale, vignettes animées `/mj`, bascule vidéos vers bucket Supabase.
+- Devant : Lot 3 (session live / dés), Lot 4 (prépa MJ), Lot 5 (compendium SRD).
+
+## Blockers
+- Aucun.
+
+## Décisions (soir)
+- **Résolution d'encodage = levier de netteté sur Retina, pas le débit** (mesuré à DPR 2). Upscaler seulement si la source est sous la résolution d'affichage ; sinon natif.
+- **Mesurer le raccord d'une boucle AVANT l'encodage h264** : le wrap post-encodage est gonflé par l'artefact de frame-I (5–8× alors que la continuité réelle est <1×). Référence : comparer aux boucles déjà validées, encodées pareil.
+- **Base de la landing dérivée de la vidéo** quand l'image fournie ne partage pas le cadrage de la vidéo : garantit un fondu image→vidéo invisible, au prix d'un repli un peu moins net (arbitrage accepté).
+- **Son des vidéos d'ouverture activé**, avec repli muet inconditionnel si l'autoplay sonore est refusé. Le son ne part que sur l'action délibérée « Commencer », jamais au chargement.
+
+## Archivage
+- Deux sessions actives seulement (19 + 20/07) ; la règle en garde 3. **Rien à archiver.** Pas de `reste-a-faire.md` créé (aucune session archivée à vider).
