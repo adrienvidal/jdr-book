@@ -11,14 +11,24 @@
 //   ffmpeg -i docs/<nom>.mp4 -an -c:v libx264 -crf 28 -preset slow \
 //     -pix_fmt yuv420p -movflags +faststart public/portraits/<nom>.mp4
 //
-// Contraintes vérifiées sur Coltar, à revérifier pour toute nouvelle vidéo :
+// Contraintes à respecter pour toute nouvelle vidéo :
 // - cadrage vertical ~9/16, pour occuper le même créneau que le portrait fixe ;
-// - la vidéo DÉMARRE sur le portrait fixe du personnage, sinon l'ouverture saute
-//   (mesuré : l'écart image → 1re image doit rester inférieur au mouvement d'une
-//   image du clip, sans quoi il faut un fondu à l'ouverture) ;
+// - même CADRAGE que le portrait fixe au démarrage. La vidéo n'a pas à en être
+//   une copie exacte — le fondu d'ouverture absorbe la dérive de régénération,
+//   qui est systématique — mais un recadrage franc, lui, se verrait ;
 // - pas d'agrandissement à l'écran : viser au moins 1248 px de haut, la demande
 //   du pire cas (mobile à DPR 3). En deçà, l'image serait plus nette que la vidéo.
+//
+// Vérifié sur les quatre vidéos : pire image entre 37,6 et 39,1 dB à l'échelle
+// d'affichage réelle. Si une nouvelle descend nettement sous 37 dB, remesurer
+// avant de la livrer.
 export const ANIMATED_PORTRAITS: Record<string, string> = {
   // Coltar le silencieux
   cmrrrjuf800000nat4wjcfidn: "/portraits/coltar.mp4",
+  // Elayne Trakand
+  cmrrw1wjh00020nee52q5po4h: "/portraits/elayne.mp4",
+  // Kezac
+  cmrrw19ah00000neex1l0hcvt: "/portraits/kezac.mp4",
+  // Lotus
+  cmrrw1hu100010neebdxc4pyv: "/portraits/lotus.mp4",
 };

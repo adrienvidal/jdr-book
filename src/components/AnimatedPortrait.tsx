@@ -19,15 +19,21 @@ import { Play, Volume2, VolumeX } from "lucide-react";
 // serait refusé sur un lien direct, un rafraîchissement ou un retour d'historique.
 // Un clic étant un geste, la lecture sonore demandée ici n'est jamais bloquée.
 //
-// Deux asymétries mesurées sur la vidéo de Coltar, qui expliquent le traitement
-// visuel :
-// - à l'ouverture, l'écart entre le portrait fixe et la 1re image de la vidéo
-//   (31,8 dB) est PLUS FAIBLE que le mouvement d'une image du clip (28,1 dB) :
-//   la bascule est moins visible qu'un battement de la vidéo → échange sec,
-//   sans transition, qui serait un fondu vers rien ;
-// - à la fin, le clip termine en gros plan sur la hache (12,6 dB par rapport au
-//   portrait) : sans fondu, la fiche resterait sur une image où le personnage
-//   n'est pas reconnaissable → fondu long, qui masque le saut.
+// Deux fondus, de durées très différentes, l'une et l'autre mesurées.
+//
+// À L'OUVERTURE, fondu court. Ces vidéos sont régénérées à partir du portrait
+// fixe et en DÉRIVENT toujours un peu (30 à 33 dB selon les personnages) :
+// visage légèrement différent, éléments animés déjà déplacés. Que cet écart se
+// voie ou non dépend du mouvement du clip, qui peut le masquer — chez Coltar il
+// passait inaperçu (écart plus faible que le mouvement d'une image), chez Lotus
+// non, le clip y est quasi immobile au départ (48 dB entre deux images) et le
+// changement de visage sauterait aux yeux. Un fondu court règle les deux cas
+// sans réglage par vidéo : imperceptible quand les images sont proches,
+// masquant quand elles divergent.
+//
+// À LA FIN, fondu long. Les clips terminent loin de leur portrait (10 à 14 dB),
+// souvent sur un gros plan où le personnage n'est plus reconnaissable. Sans
+// fondu, la fiche resterait figée sur cette image.
 type Phase = "hidden" | "playing" | "fading";
 
 export function AnimatedPortrait({
@@ -112,9 +118,9 @@ export function AnimatedPortrait({
               return "hidden";
             })
           }
-          className={`absolute inset-0 h-full w-full object-cover sepia-[.08] ${
-            phase === "playing" ? "opacity-100" : "opacity-0"
-          } ${phase === "fading" ? "transition-opacity duration-[800ms]" : ""}`}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity sepia-[.08] ${
+            phase === "playing" ? "opacity-100 duration-300" : "opacity-0"
+          } ${phase === "fading" ? "duration-[800ms]" : ""}`}
         />
       </div>
 
