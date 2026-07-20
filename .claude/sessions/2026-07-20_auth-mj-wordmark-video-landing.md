@@ -71,7 +71,7 @@ Correctif : `useActionState` et l'état d'ouverture remontent dans `LandingEnter
 - Le bouton connecté **reste un vrai lien** : clic milieu et « ouvrir dans un onglet » continuent de marcher, seul le clic simple joue la vidéo.
 
 ### Reste à faire (ajouts de ce temps)
-- **`landing-desk-start.mp4` à fournir** (Adrien). En attendant, desktop joue la portrait recadrée : vérifié en 1440×900, **c'est très zoomé et visiblement mou** (720 px étirés au double), la lanterne et les bougies sortent du cadre. Passable en provisoire, pas tenable. Une seule ligne à changer une fois le fichier déposé (`START_VIDEO` → choix par viewport, comme `LandingVideo`).
+- ~~**`landing-desk-start.mp4` à fournir**~~ **FAIT** (7e→8e temps). Desktop jouait la portrait recadrée : vérifié en 1440×900, **c'est très zoomé et visiblement mou** (720 px étirés au double), la lanterne et les bougies sortent du cadre. Passable en provisoire, pas tenable. Une seule ligne à changer une fois le fichier déposé (`START_VIDEO` → choix par viewport, comme `LandingVideo`).
 - **Contrôle sur téléphone réel** : la cérémonie dure ~7 s au total. À juger à l'usage — c'est agréable la première fois, la question est la dixième.
 - Sur mobile il n'y a pas de survol : le préchargement ne dispose que des 450 ms d'effacement. À surveiller en 4G.
 
@@ -99,6 +99,12 @@ Correctif : `useActionState` et l'état d'ouverture remontent dans `LandingEnter
 - **Résolution native suffit** : la source étant vraiment en 1924, natif 1924 (391 Ko) et upscale 2560 (534 Ko) sont indiscernables à DPR 2. Retenu le **natif 1924** — plus léger, aucun pixel inventé. Plus de `scale` dans la chaîne pour desk3.
 - Base `landing-desk.webp` régénérée depuis la frame 0, natif 1924, `unsharp=5:5:1.0`, q78 (143 Ko). Cadrage base↔frame0 vidéo vérifié (MAD 1,43) → fondu invisible.
 - **Chaîne desk3 (source ≥ résolution d'affichage)** : boucle → `unsharp=5:5:1.0` → H.264 CRF 29 sans audio +faststart, **résolution native**. L'upscale n'est utile que si la source est sous la résolution d'affichage Retina (cas desk2 en 1284).
+
+### Vidéo d'ouverture desktop (landing-desk-start) — le provisoire est levé
+- Adrien a fourni `docs/landing-desk-start.mp4` (1924×1076, paysage). Desktop jouait jusque-là la **portrait recadrée** en attendant (provisoire assumé aux temps précédents). Fini.
+- **Encodage** : pas de boucle (la vidéo joue une fois), natif 1924, sans audio, `+faststart`. CRF choisi par mesure : source / CRF22 / CRF25 / CRF28 indiscernables sur le détail statique ; **et surtout le pic d'explosion (frame 87, la plus lumineuse) ne bande pas à CRF28** — c'est le halo doré qui aurait trahi un CRF trop haut. Retenu **CRF28, 765 Ko**.
+- **Code** (`LandingEnter.tsx`) : `START_VIDEO` constant remplacé par `startVideoSrc()` qui choisit selon le viewport (`min-width: 640px`), exactement comme `LandingVideo` pour la boucle de fond — l'attribut `media` de `<source>` n'étant pas honoré dans `<video>`. Desktop → `landing-desk-start`, mobile → `landing-mobile-start`.
+- **Vérifié au navigateur** DPR 2 : desktop charge bien la paysage (1924), plein cadre sans recadrage, joue 0→5,04 s puis `/table` ; mobile 390 charge toujours la portrait (720). Non-régression confirmée des deux côtés.
 
 ### Le piège évité
 L'image `landing-desk2.png` (plan large, tabourets visibles) et la vidéo `landing-desk2.mp4` (plus resserrée) sont **deux compositions différentes** — vérifié : la recherche d'alignement par recadrage centré trouve son optimum à zoom 1,0, donc la vidéo n'est pas un agrandissement de l'image. Or l'ancienne paire était alignée au pixel (la vidéo = version animée de l'image). Livrer la nouvelle paire telle quelle aurait rejoué, sur desktop, **le saut de zoom au fondu image→vidéo** qu'Adrien venait de faire supprimer sur mobile. D'où la question posée, et la base dérivée de la vidéo : fondu invisible par construction (vérifié au navigateur en 1440, cadrages identiques).

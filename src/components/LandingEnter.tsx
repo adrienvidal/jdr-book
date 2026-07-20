@@ -26,10 +26,15 @@ import { SubmitButton } from "@/components/SubmitButton";
 const START_CLASSES =
   "btn-wax focus-ring-parch h-14 px-10 text-lg tracking-[0.04em] focus-visible:ring-parch/40";
 
-// La version paysage de la vidéo d'entrée n'existe pas encore : desktop joue
-// la même source, recadrée par object-cover. Quand /landing-desk-start.mp4
-// sera déposé, choisir la source selon le viewport comme le fait LandingVideo.
-const START_VIDEO = "/landing-mobile-start.mp4";
+// Source de la vidéo d'ouverture selon le viewport, comme la boucle de fond :
+// paysage sur desktop, portrait sur mobile. L'attribut `media` de <source>
+// n'étant pas honoré dans <video>, on choisit ici pour ne charger qu'une seule
+// source. À n'appeler que côté client (matchMedia).
+function startVideoSrc() {
+  return window.matchMedia("(min-width: 640px)").matches
+    ? "/landing-desk-start.mp4"
+    : "/landing-mobile-start.mp4";
+}
 
 // Effacement du bloc du bas, puis fondu vers /table. Deux durées, deux rôles :
 // on ne les confond pas dans une constante commune.
@@ -76,7 +81,7 @@ export function LandingEnter({
   // 900 Ko pour un visiteur qui ne fait que regarder.
   const arm = useCallback(() => {
     const el = video.current;
-    if (el && !el.src) el.src = START_VIDEO;
+    if (el && !el.src) el.src = startVideoSrc();
     router.prefetch("/table");
   }, [router]);
 
