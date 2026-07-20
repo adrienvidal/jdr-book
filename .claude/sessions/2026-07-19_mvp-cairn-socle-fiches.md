@@ -95,7 +95,7 @@
 ## Passe UI hero + fiches + page MJ (même jour, skill impeccable)
 
 ### Réalisé
-- **Auth MJ désactivée temporairement** (`3e3e581`) : bloc de vérif du mot de passe MJ **commenté** dans `src/middleware.ts` avec `TODO(à remettre)`. `/mj` reste protégé par l'auth d'app. **⚠ à réactiver plus tard** (décommenter le bloc).
+- **Auth MJ désactivée temporairement** (`3e3e581`) : bloc de vérif du mot de passe MJ **commenté** dans `src/middleware.ts` avec `TODO(à remettre)`. `/mj` reste protégé par l'auth d'app. *(Suite : le 2026-07-20 la feature a été **supprimée** plutôt que réactivée — ce `TODO` n'existe plus.)*
 - **Accueil — card MJ format personnage** (`1074d52`) : sections titrées « Personnages » / « Meneur de jeu » (composant `SectionHeading` + trait moss). La card MJ prend le gabarit 9:16 des cards perso mais garde son identité (liseré/ring moss, badge bouclier, overlay teinté vert). Ancienne bannière horizontale retirée.
 - **Fiche perso — bouton import + portrait mobile** (`8e28789`) : gros bouton beige → **bouton overlay « appareil photo »** en coin de la photo (`PortraitUpload` rendu flexible : `label`/`variant`/`size`/`className`). Portrait mobile agrandi.
 - **Fiche perso — hero plein écran façon Steam** (`8e28789`) : en-tête transformé en hero **bord à bord** (breakout `w-screen` + `overflow-x:hidden` sur `body`). Fond = **même image adoucie** (`blur-md`, pas trop floue pour rester lisible), portrait net centré, **nom en surimpression** (kicker « Cairn ») sur dégradé bas, barre Accueil/Supprimer sur scrim, bouton photo overlay. Corps de la fiche sous le hero. Textes du hero agrandis sur desktop (`5bfd718` : nom `lg:text-6xl`, kicker, boutons).
@@ -104,7 +104,7 @@
 - Vérifs vertes à chaque étape (`tsc`, `next build`, navigateur desktop+mobile, 0 erreur console). Tout **poussé sur `origin/main`**.
 
 ### Reste à faire
-- **⚠ Réactiver l'authentification MJ** (`src/middleware.ts`, bloc commenté `TODO(à remettre)`) quand la phase de test/démo sera finie.
+- ~~**⚠ Réactiver l'authentification MJ**~~ — **caduc au 2026-07-20** : la feature a été supprimée, pas réactivée (voir session du 20/07).
 - **Recréer le bucket `portraits` (public) sur la prod** (inchangé).
 - Reste inchangé : durcir les secrets, Lot 3 (session live/dés), Lot 4 (prépa MJ), Lot 5 (compendium).
 
@@ -162,7 +162,7 @@ Spec landing : `docs/superpowers/specs/2026-07-19-landing-publique-commencer-des
 ### Reste à faire
 - **Définir `NEXT_PUBLIC_SITE_URL`** sur l'hébergeur pour des liens OG absolus (sinon repli URL Vercel).
 - Optionnel : **manifest PWA + icônes** (192/512) pour un vrai « installer l'app » (icônes à générer d'abord).
-- Toujours ouvert (hérité) : réactiver l'auth MJ (`middleware.ts`, bloc `TODO(à remettre)`) ; recréer le bucket `portraits` (public) en prod ; durcir les secrets.
+- Toujours ouvert (hérité) : recréer le bucket `portraits` (public) en prod ; durcir les secrets.
 
 ### Blockers
 - Aucun.
@@ -186,7 +186,7 @@ Tout poussé sur `origin/main` (dernier commit `f27d7ab`).
   - **Note importante** : le bug ne se manifeste **qu'en prod** (en dev tout est dynamique). Après déploiement, le rebuild régénère `/table` depuis la base → les données déjà saisies réapparaissent.
 
 ### Reste à faire
-- Inchangé : `NEXT_PUBLIC_SITE_URL` à définir en prod (liens OG absolus) ; manifest PWA + icônes (optionnel) ; réactiver l'auth MJ (`middleware.ts`, `TODO(à remettre)`) ; recréer le bucket `portraits` (public) en prod ; durcir les secrets.
+- Inchangé : `NEXT_PUBLIC_SITE_URL` à définir en prod (liens OG absolus) ; manifest PWA + icônes (optionnel) ; recréer le bucket `portraits` (public) en prod ; durcir les secrets.
 
 ### Blockers
 - Aucun.
@@ -206,7 +206,7 @@ Tout poussé sur `origin/main` (dernier commit `f7bcb88`).
 - **Fix build Vercel** (`f7bcb88`) : le déploiement de `c250329` a échoué au type-check (`Property 'sorts' does not exist on type 'CharacterWithItems'`). **Racine** : le Prisma Client généré vit dans `node_modules` (non commité) et Vercel **restaure son cache de build** → client stale, types sans `sorts` (en local ça passait car la migration avait régénéré le client). **Fix** : `prisma generate` ajouté en **`postinstall`** (couvre le cache restauré) **et** en tête du **`build`** (`prisma generate && next build`, ceinture). Build local revérifié vert.
 
 ### Reste à faire
-- Inchangé : `NEXT_PUBLIC_SITE_URL` à définir en prod (liens OG absolus) ; manifest PWA + icônes (optionnel) ; réactiver l'auth MJ (`middleware.ts`, `TODO(à remettre)`) ; recréer le bucket `portraits` (public) en prod ; durcir les secrets.
+- Inchangé : `NEXT_PUBLIC_SITE_URL` à définir en prod (liens OG absolus) ; manifest PWA + icônes (optionnel) ; recréer le bucket `portraits` (public) en prod ; durcir les secrets.
 
 ### Blockers
 - Aucun.

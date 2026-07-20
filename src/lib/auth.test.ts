@@ -1,27 +1,24 @@
 import { beforeAll, expect, test } from "vitest";
-import { checkPassword, cookieName, signSession, verifySession } from "@/lib/auth";
+import { checkPassword, COOKIE_NAME, signSession, verifySession } from "@/lib/auth";
 
 beforeAll(() => {
   process.env.AUTH_SECRET = "test-secret-at-least-32-characters-long!!";
   process.env.APP_PASSWORD = "app-pw";
-  process.env.MJ_PASSWORD = "mj-pw";
 });
 
-test("checkPassword compare au bon mot de passe", () => {
-  expect(checkPassword("app", "app-pw")).toBe(true);
-  expect(checkPassword("app", "mj-pw")).toBe(false);
-  expect(checkPassword("mj", "mj-pw")).toBe(true);
+test("checkPassword compare au mot de passe de l'app", () => {
+  expect(checkPassword("app-pw")).toBe(true);
+  expect(checkPassword("mauvais")).toBe(false);
+  expect(checkPassword("")).toBe(false);
 });
 
-test("cookieName mappe le scope", () => {
-  expect(cookieName("app")).toBe("app_auth");
-  expect(cookieName("mj")).toBe("mj_auth");
+test("le cookie de session garde son nom historique", () => {
+  expect(COOKIE_NAME).toBe("app_auth");
 });
 
-test("un token signé pour un scope se vérifie pour ce scope seulement", async () => {
-  const token = await signSession("app");
-  expect(await verifySession(token, "app")).toBe(true);
-  expect(await verifySession(token, "mj")).toBe(false);
-  expect(await verifySession(undefined, "app")).toBe(false);
-  expect(await verifySession("garbage", "app")).toBe(false);
+test("un token signé se vérifie, un token invalide non", async () => {
+  const token = await signSession();
+  expect(await verifySession(token)).toBe(true);
+  expect(await verifySession(undefined)).toBe(false);
+  expect(await verifySession("garbage")).toBe(false);
 });

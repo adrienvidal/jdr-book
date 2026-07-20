@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { cookieName, verifySession } from "@/lib/auth";
+import { COOKIE_NAME, verifySession } from "@/lib/auth";
 import { LandingStart } from "@/components/LandingStart";
 
 // Landing publique — écran de démarrage façon jeu vidéo.
@@ -14,7 +14,7 @@ export default async function Landing({
   searchParams: Promise<{ login?: string }>;
 }) {
   const [jar, { login }] = await Promise.all([cookies(), searchParams]);
-  const authed = await verifySession(jar.get(cookieName("app"))?.value, "app");
+  const authed = await verifySession(jar.get(COOKIE_NAME)?.value);
 
   return (
     <main className="relative min-h-dvh overflow-hidden">

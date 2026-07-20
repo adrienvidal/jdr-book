@@ -1,22 +1,16 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifySession } from "@/lib/auth";
+import { COOKIE_NAME, verifySession } from "@/lib/auth";
 
-const PUBLIC = ["/", "/login", "/mj/login", "/opengraph-image", "/icon", "/apple-icon"];
+const PUBLIC = ["/", "/login", "/opengraph-image", "/icon", "/apple-icon"];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   if (PUBLIC.includes(pathname)) return NextResponse.next();
 
-  const appOk = await verifySession(req.cookies.get("app_auth")?.value, "app");
+  const appOk = await verifySession(req.cookies.get(COOKIE_NAME)?.value);
   if (!appOk) return NextResponse.redirect(new URL("/?login=1", req.url));
 
-  // TODO(à remettre) : authentification MJ désactivée temporairement.
-  // Réactiver en décommentant le bloc ci-dessous.
-  // if (pathname.startsWith("/mj")) {
-  //   const mjOk = await verifySession(req.cookies.get("mj_auth")?.value, "mj");
-  //   if (!mjOk) return NextResponse.redirect(new URL("/mj/login", req.url));
-  // }
   return NextResponse.next();
 }
 
