@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Play, Volume2, VolumeX, X } from "lucide-react";
+import { Maximize, Play, Volume2, VolumeX, X } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 // Portrait animé du hero de fiche : la vidéo se joue une fois à l'ouverture,
@@ -36,11 +36,14 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 // souvent sur un gros plan où le personnage n'est plus reconnaissable. Sans
 // fondu, la fiche resterait figée sur cette image.
 //
-// GRAND FORMAT À LA DEMANDE. La lecture d'ouverture reste dans le hero ; un clic
-// sur Play ouvre une modale embarquée qui rejoue le clip en grand, avec le son
-// et des contrôles. Modale et non plein écran natif : l'habillage reste celui de
-// l'app, et le comportement est identique sur tous les navigateurs — le plein
-// écran natif d'iOS remplace la page par un lecteur système.
+// DEUX COMMANDES INDÉPENDANTES. Play rejoue le clip SUR PLACE, dans le hero,
+// avec le son ; un second bouton l'ouvre en grand dans une modale embarquée.
+// Agrandir n'est pas une étape de la lecture mais un choix à part, offert au
+// repos comme en cours de lecture.
+//
+// Modale et non plein écran natif : l'habillage reste celui de l'app et le
+// comportement est identique sur tous les navigateurs — le plein écran natif
+// d'iOS remplace la page par un lecteur système.
 //
 // La modale a SA PROPRE balise vidéo, plutôt que de déplacer celle du hero :
 // React ne peut pas transporter un nœud d'un parent à l'autre sans le remonter,
@@ -57,6 +60,11 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 type Phase = "hidden" | "playing" | "fading";
 
 const CLE = (videoSrc: string) => `portrait-anime-vu:${videoSrc}`;
+
+// Habillage commun aux commandes posées sur une image : pastille sombre et
+// floutée, lisible aussi bien sur un portrait clair que sur une vidéo sombre.
+const COMMANDE =
+  "rounded-full bg-black/40 p-3 text-parch backdrop-blur-sm transition hover:bg-black/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-parch/70";
 
 // `sessionStorage` lève en navigation privée sur certains Safari, et son absence
 // n'est pas un cas d'erreur ici : au pire l'animation se rejoue, ce qui était le
@@ -192,36 +200,52 @@ export function AnimatedPortrait({
         />
       </div>
 
-      {/* Commande unique, posée sur la bande floutée à droite du portrait : ne
-          recouvre jamais le personnage, ni la barre du haut, ni le nom en bas.
-          Deux rôles selon l'état, plutôt que deux boutons concurrents — au
-          repos elle relance, en lecture elle pilote le son. */}
-      <button
-        type="button"
-        onClick={enLecture ? basculerSon : ouvrirModale}
-        aria-label={
-          enLecture
-            ? sonActif
-              ? "Couper le son"
-              : "Activer le son"
-            : `Voir le portrait animé de ${alt} en grand, avec le son`
-        }
-        // `z-10` n'est pas décoratif : les dégradés du hero sont posés après ce
-        // bouton dans le DOM et interceptent le pointeur. Sans ça, le bouton
-        // reste visible mais devient inerte dès que le hero est assez court
-        // pour que le dégradé du bas remonte jusqu'à lui — c'est le cas de /mj.
-        className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/40 p-3 text-parch backdrop-blur-sm transition hover:bg-black/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-parch/70 sm:right-6"
-      >
-        {enLecture ? (
-          sonActif ? (
-            <Volume2 className="size-5" />
+      {/* Commandes posées sur la bande floutée à droite du portrait : elles ne
+          recouvrent jamais le personnage, ni la barre du haut, ni le nom en bas.
+          Empilées et non côte à côte — la bande est étroite, et sur mobile deux
+          boutons alignés déborderaient sur le visage.
+
+          `z-10` n'est pas décoratif : les dégradés du hero sont posés après ces
+          boutons dans le DOM et interceptent le pointeur. Sans ça, ils restent
+          visibles mais deviennent inertes dès que le hero est assez court pour
+          que le dégradé du bas remonte jusqu'à eux — c'est le cas de /mj. */}
+      <div className="absolute right-3 top-1/2 z-10 flex -translate-y-1/2 flex-col gap-2 sm:right-6">
+        {/* Deux rôles selon l'état plutôt que deux boutons concurrents : au repos
+            elle relance dans le hero avec le son, en lecture elle pilote le son. */}
+        <button
+          type="button"
+          onClick={enLecture ? basculerSon : () => lire(true)}
+          aria-label={
+            enLecture
+              ? sonActif
+                ? "Couper le son"
+                : "Activer le son"
+              : `Rejouer le portrait animé de ${alt}, avec le son`
+          }
+          className={COMMANDE}
+        >
+          {enLecture ? (
+            sonActif ? (
+              <Volume2 className="size-5" />
+            ) : (
+              <VolumeX className="size-5" />
+            )
           ) : (
-            <VolumeX className="size-5" />
-          )
-        ) : (
-          <Play className="size-5 fill-current" />
-        )}
-      </button>
+            <Play className="size-5 fill-current" />
+          )}
+        </button>
+
+        {/* Toujours offert, en lecture comme au repos : agrandir n'est pas une
+            étape de la lecture, c'est un choix indépendant. */}
+        <button
+          type="button"
+          onClick={ouvrirModale}
+          aria-label={`Voir le portrait animé de ${alt} en grand`}
+          className={COMMANDE}
+        >
+          <Maximize className="size-5" />
+        </button>
+      </div>
 
       <Dialog open={modale} onOpenChange={setModale}>
         {/* La modale occupe la fenêtre entière et laisse la vidéo se dimensionner
@@ -245,7 +269,7 @@ export function AnimatedPortrait({
             type="button"
             onClick={() => setModale(false)}
             aria-label="Fermer"
-            className="absolute right-3 top-3 z-10 rounded-full bg-black/40 p-3 text-parch backdrop-blur-sm transition hover:bg-black/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-parch/70 sm:right-6 sm:top-6"
+            className={`absolute right-3 top-3 z-10 sm:right-6 sm:top-6 ${COMMANDE}`}
           >
             <X className="size-5" />
           </button>
