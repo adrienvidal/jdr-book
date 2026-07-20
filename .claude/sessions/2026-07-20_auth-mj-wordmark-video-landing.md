@@ -196,3 +196,61 @@ Poussé sur `origin/main` (`4b6a0bd..5d1922e`, 2 commits).
 - **Un défaut de mise en page ne se voit pas dans le DOM, il se mesure.** La vidéo débordait de 422 px en hauteur ; tous les attributs étaient corrects et la balise était bien là. C'est `getBoundingClientRect` comparé à la fenêtre qui l'a montré, pas l'inspection de la structure.
 - **Un composant partagé porte les hypothèses de son premier usage.** Le `×` de `DialogContent` était réglé pour la modale de login, sur fond de carte clair. Réutiliser le composant sur fond sombre ne suffisait pas ; il fallait vérifier le contraste dans le nouveau contexte.
 - **Un arbitrage tranché hier peut être rouvert demain, et c'est normal.** Le plein écran avait été écarté avec de bons arguments, mesurés. Ils n'ont pas cessé d'être vrais : Adrien a choisi d'en payer le prix. Noter le revirement **et** ce qui reste vrai de l'argument d'origine, plutôt que d'effacer l'un ou l'autre.
+
+---
+
+# 5e temps de la journée — Garde-fou, commandes séparées, landing, témoin de chargement
+
+Poussé sur `origin/main` (`b763863..9afd47b`, 4 commits).
+
+## Réalisé
+
+### Une seule ouverture animée par portrait et par onglet (`79fdc3f`)
+- Revenir sur une fiche déjà vue ne relance plus la vidéo. **Portée par clip** (chaque portrait a droit à son ouverture), drapeau en `sessionStorage` sous `portrait-anime-vu:<chemin>`.
+- **Le drapeau est posé sur `playing`**, pas au montage : un autoplay refusé (Safari/iOS, économie d'énergie) aurait sinon brûlé l'unique ouverture sans que rien n'ait été montré.
+- **Ouvrir la modale marque aussi le portrait comme vu**, sinon revenir sur la fiche juste après relancerait l'ouverture — la redondance même qu'on veut supprimer.
+- Accès au stockage protégé (`try`/`catch`) : il lève en navigation privée sur certains Safari. En cas d'échec le garde-fou ne s'applique pas et l'animation se rejoue — jamais une page cassée.
+- **Contrôle joué** : après vidage du `sessionStorage`, l'animation repart. C'est bien le garde-fou qui la supprimait, pas autre chose de cassé. 2e visite : **aucune source posée, 0 octet**.
+
+### Rejouer sur place et voir en grand, séparés (`4634c4d`)
+- Play rejouait dans la modale, ce qui ôtait toute façon de revoir le clip **à sa place** dans le hero. Il redevient un rejeu sur place avec le son ; l'agrandissement passe sur un **bouton dédié**, offert au repos comme en cours de lecture.
+- Commandes **empilées** et non côte à côte : la bande floutée est étroite, deux boutons alignés déborderaient sur le visage en mobile. Mesuré en 390 px — cibles 44×44, boutons à x=327, portrait jusqu'à 305.
+- Habillage des pastilles sorti dans une constante, partagé par les deux commandes du hero et la fermeture de la modale.
+
+### Landing éclaircie (`90bc48e`)
+- **Mesure avant action, et elle a changé la solution** : la vidéo n'est *pas* plus sombre que l'image de base (71,5 contre 72,5 de luminance moyenne, 1 % d'écart). Ce sont les **voiles noirs** qui assombrissent — source à 71,5, composite à 38,5.
+- Agir sur les voiles éclaircit **les deux couches à l'identique** : pas de réencodage, pas d'octet ajouté, et **aucun saut de luminosité au fondu image → vidéo**. Éclaircir la vidéo seule aurait rendu la bascule visible.
+- Dégradé `55/35/80 → 38/18/66`, vignette `0,6 → 0,45`. **+33 % de luminance composite.** Contraste texte/fond mesuré sur le rendu : **5,8:1 au pire** (bande du titre), contre 4,5:1 exigé pour du texte normal, 3:1 pour du grand texte — et le titre porte une ombre portée.
+- Variante à +50 % essayée et **écartée** : elle aplatit la vignette et fait perdre l'ambiance à la bougie.
+
+### Témoin de chargement dans la carte cliquée (`9afd47b`)
+- Les fiches sont des **routes dynamiques sans `loading.js`** : entre le clic et l'affichage, rien ne bougeait.
+- `useLinkStatus` (Next 16, contrat vérifié dans la doc via context7) ne renseigne que sur le `<Link>` englobant → **état par carte**. Vérifié en cliquant la 3e carte sur 5 : elle seule s'allume.
+- **Le délai à l'apparition n'est pas cosmétique** : sans lui, une navigation courte ferait clignoter le témoin à chaque clic, plus perturbant que pas d'indicateur. Mesuré : opacité à 0 pendant ~120 ms, puis montée. Pas de délai au retour.
+- Posé **en haut à gauche** dans toutes les cartes : seul coin libre, l'écusson du meneur occupant la droite.
+
+### Vérifs
+`tsc` + `next build` verts, **12/12 vitest** à chaque étape. Navigateur sur le **build de prod**, desktop 1440×900 et mobile 390×844. Pour le témoin, **latence réseau émulée par CDP** — sans ça la navigation locale est trop rapide pour qu'il apparaisse, et le test n'aurait rien testé.
+
+## Reste à faire
+- Repris des temps précédents, toujours ouvert : **`AUTH_SECRET` sur Vercel** + redéploiement ; **limitation de tentatives sur `loginAppAction`** ; manifest PWA ; `autoComplete` sur la modale de login.
+- **Contrôle non fait, à faire par Adrien** : netteté de la vidéo **dans la modale** sur téléphone réel (~1,6× d'agrandissement, contre 0,97× au pire dans le hero). Si ça pique, **réencoder en résolution supérieure, pas retoucher le CSS**.
+- **Contrôle non fait** : la landing éclaircie sur téléphone réel. Les écrans de téléphone sont souvent plus lumineux — le réglage peut y paraître délavé là où il est juste sur desktop.
+- Si le casting grandit : **basculer les vidéos vers le bucket Supabase**.
+- Non traité : **vignettes animées dans la grille `/mj`** (plusieurs vidéos simultanées).
+- Toujours devant : Lot 3 (session live / dés), Lot 4 (prépa MJ), Lot 5 (compendium SRD).
+
+## Blockers
+- Aucun.
+
+## Décisions
+- **Garde-fou par personnage et par onglet**, pas global ni définitif. L'animation présente le personnage : la refuser parce qu'un autre a été vu avant serait arbitraire, et un `localStorage` priverait à jamais un joueur à qui l'on prête le téléphone.
+- **Deux commandes indépendantes.** Agrandir n'est pas une étape de la lecture mais un choix à part.
+- **Éclaircir par les voiles, pas par la vidéo.** Une seule couche éclaircie aurait créé un saut au fondu.
+- **Éclaircissement modéré (+33 %) plutôt que fort (+50 %).** « Un peu », comme demandé ; la variante forte perd la vignette.
+
+## Leçons de méthode (pour les prochaines fois)
+- **Mesurer avant d'agir peut changer la solution, pas seulement la valider.** La demande était « éclaircir la vidéo » ; la mesure a montré que la vidéo n'y était pour rien. Corriger la vidéo aurait créé un défaut (saut au fondu) tout en laissant la cause en place.
+- **Un test qui ne peut pas échouer ne teste rien.** Le témoin de chargement n'apparaît jamais sur une navigation locale non bridée. Sans latence émulée, j'aurais « vérifié » un composant invisible et conclu à tort. Même famille que le Chromium de Playwright lancé avec `--autoplay-policy=no-user-gesture-required` hier.
+- **Vérifier aussi le cas inverse.** Le témoin devait apparaître sur navigation lente *et* rester invisible sur navigation rapide. Le second cas est celui qui aurait produit un clignotement en usage réel, et il ne se voit pas si on ne teste que le premier.
+- **Contrôler la portée d'un état partagé en le déclenchant hors du premier élément.** Cliquer la 1re carte n'aurait pas distingué « état par carte » de « état global » : c'est en cliquant la 3e qu'on le prouve.
