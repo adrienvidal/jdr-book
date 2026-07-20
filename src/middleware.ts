@@ -17,8 +17,9 @@ export async function middleware(req: NextRequest) {
 export const config = {
   // Exclut les internes Next et les assets statiques du dossier public (sinon
   // l'optimiseur next/image, qui va chercher l'image sans cookie d'auth, se fait
-  // rediriger vers /login → image invalide).
+  // rediriger vers /login → image invalide). Les vidéos en font partie : la
+  // landing est publique, son fond doit se charger sans cookie.
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|mp4|webm)$).*)",
   ],
 };

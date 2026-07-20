@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { COOKIE_NAME, verifySession } from "@/lib/auth";
 import { LandingStart } from "@/components/LandingStart";
+import { LandingVideo } from "@/components/LandingVideo";
 
 // Landing publique — écran de démarrage façon jeu vidéo.
 // Route publique. On lit le cookie de session juste pour personnaliser le
@@ -19,7 +20,9 @@ export default async function Landing({
   return (
     <main className="relative min-h-dvh overflow-hidden">
       {/* Fond cinématique — art direction : portrait sur mobile, paysage sur
-          desktop. <picture> pour ne télécharger que l'image du viewport courant. */}
+          desktop. <picture> pour ne télécharger que l'image du viewport courant.
+          L'image est la couche de base (rendu immédiat) ; LandingVideo pose la
+          boucle vidéo par-dessus en fondu quand elle est prête. */}
       <picture>
         <source media="(min-width: 640px)" srcSet="/landing-desk.webp" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -31,6 +34,7 @@ export default async function Landing({
           className="absolute inset-0 h-full w-full object-cover object-center scale-105"
         />
       </picture>
+      <LandingVideo />
       {/* Assombrissement + vignette (image chaude : on garde l'ambiance) */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-black/80" />
       <div className="absolute inset-0 [background:radial-gradient(120%_85%_at_50%_42%,transparent_30%,rgba(0,0,0,0.6)_100%)]" />
