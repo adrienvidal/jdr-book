@@ -46,7 +46,36 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 // React ne peut pas transporter un nœud d'un parent à l'autre sans le remonter,
 // ce qui couperait la lecture. Le fichier étant déjà en cache après l'ouverture,
 // ce second élément ne coûte pas un téléchargement.
+//
+// UNE SEULE OUVERTURE ANIMÉE PAR PORTRAIT ET PAR ONGLET. Revenir sur une fiche
+// déjà vue ne relance plus la vidéo : l'animation présente le personnage, elle
+// n'a pas à se rejouer à chaque aller-retour. Le drapeau est posé PAR CLIP —
+// chaque portrait a droit à son ouverture — et vit dans `sessionStorage`, donc
+// il survit aux navigations et au rafraîchissement, et se remet à zéro à la
+// fermeture de l'onglet. Le bouton Play, lui, reste toujours disponible : le
+// garde-fou ne concerne que le lancement automatique.
 type Phase = "hidden" | "playing" | "fading";
+
+const CLE = (videoSrc: string) => `portrait-anime-vu:${videoSrc}`;
+
+// `sessionStorage` lève en navigation privée sur certains Safari, et son absence
+// n'est pas un cas d'erreur ici : au pire l'animation se rejoue, ce qui était le
+// comportement d'avant.
+function dejaVu(videoSrc: string) {
+  try {
+    return sessionStorage.getItem(CLE(videoSrc)) !== null;
+  } catch {
+    return false;
+  }
+}
+
+function marquerVu(videoSrc: string) {
+  try {
+    sessionStorage.setItem(CLE(videoSrc), "1");
+  } catch {
+    // sans mémoire, le garde-fou ne s'applique simplement pas
+  }
+}
 
 export function AnimatedPortrait({
   videoSrc,
@@ -83,8 +112,9 @@ export function AnimatedPortrait({
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (dejaVu(videoSrc)) return;
     lire(false);
-  }, [lire]);
+  }, [lire, videoSrc]);
 
   // Ouvrir la modale remet le hero au repos : deux lectures simultanées du même
   // clip, décalées et l'une muette, n'ont aucun intérêt.
@@ -96,6 +126,10 @@ export function AnimatedPortrait({
     }
     setPhase("hidden");
     setSonActif(false);
+    // Regarder le clip en grand vaut l'avoir vu : sans ça, revenir sur la fiche
+    // aussitôt après relancerait l'ouverture animée — exactement la redondance
+    // que le garde-fou existe pour éviter.
+    marquerVu(videoSrc);
     setModale(true);
   };
 
@@ -133,7 +167,15 @@ export function AnimatedPortrait({
           tabIndex={-1}
           // `playing` et non `canplay` : il se redéclenche à chaque rejeu, alors
           // que `canplay` ne se produit qu'au premier chargement.
-          onPlaying={() => setPhase("playing")}
+          //
+          // Le portrait est marqué vu ICI, quand des images s'affichent
+          // réellement, et non au montage : un autoplay refusé (Safari/iOS,
+          // économie d'énergie) brûlerait sinon l'unique ouverture sans que rien
+          // n'ait été montré.
+          onPlaying={() => {
+            setPhase("playing");
+            marquerVu(videoSrc);
+          }}
           onEnded={() => setPhase("fading")}
           onTransitionEnd={() =>
             setPhase((p) => {
