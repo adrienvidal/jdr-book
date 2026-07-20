@@ -56,7 +56,7 @@ Aucun changement de code : uniquement de la config et de la vérification sur `h
 - Optionnel : manifest PWA + icônes 192/512.
 - Optionnel : `autoComplete="current-password"` sur le champ de la modale (Chrome émet un avis verbose).
 - Optionnel : **régénérer les vidéos à plus haute définition** à la source, seul moyen d'égaler la netteté de l'image fixe.
-- **`docs/coltar.mp4`** (13 Mo) toujours non suivi — si portraits animés sur les fiches, chantier à part (plusieurs vidéos simultanées dans une grille : ne pas toutes les lire en même temps).
+- ~~**`docs/coltar.mp4`** (13 Mo) toujours non suivi — si portraits animés sur les fiches, chantier à part~~ — **fait** au 3e temps de la journée, pour les 4 personnages et le MJ. Reste ouvert en revanche : les vignettes animées dans la grille `/mj` (plusieurs vidéos simultanées).
 - Toujours devant : Lot 3 (session live / dés), Lot 4 (prépa MJ), Lot 5 (compendium SRD).
 
 ## Blockers
@@ -68,7 +68,7 @@ Aucun changement de code : uniquement de la config et de la vérification sur `h
 - **Entropie d'une phrase de passe, mesurée** (10 essais/s, sans throttling) : 19 bits → 15 h ; **36 bits (5 mots français) → 54 ans** ; 63 bits (4 mots du dictionnaire système) → inviolable mais indictable. **Au-delà de 5 mots le compromis n'existe plus** : on paie de la lisibilité contre une menace déjà nulle. Si un vrai mot de passe devient nécessaire, viser 5 mots.
 - **Auth MJ supprimée, pas réactivée.** Le claim `scope:"app"` du JWT est conservé pour la compatibilité des cookies existants — à ne pas retirer sans accepter de déconnecter tout le monde.
 - **Le wordmark est le lien d'accueil** sur `/table`. « Accueil » dans les boutons retour désigne toujours `/table` (fiche perso, `/mj`) ; la landing `/` est l'« écran-titre ».
-- **Sources d'art ignorées dans git** : `/docs/landing*.png` **et** `/docs/landing*.mp4`. Seules les versions optimisées de `public/` sont versionnées.
+- **Sources d'art ignorées dans git** : `/docs/landing*.png` **et** `/docs/landing*.mp4`. Seules les versions optimisées de `public/` sont versionnées. — *Élargi au 3e temps de la journée : la règle vidéo est devenue `/docs/*.mp4`, aucune source vidéo n'a vocation à être suivie.*
 - **Chaîne vidéo de la landing**, à réappliquer telle quelle si régénération : coupe de l'amorce → fondu enchaîné 12 images → `unsharp=5:5:2.0` → H.264 CRF 28 sans audio, `+faststart`.
 - **Règle middleware** : tout nouveau type d'asset statique servi depuis `public/` doit être ajouté au `matcher`, sinon il est intercepté par l'auth. Déjà oublié deux fois (icônes le 19/07, vidéos aujourd'hui).
 - **Le `<picture>` reste la couche de base de la landing** ; la vidéo est une amélioration progressive posée par-dessus. Toute dégradation retombe sur l'image sans code dédié.
@@ -81,3 +81,71 @@ Aucun changement de code : uniquement de la config et de la vérification sur `h
 - **Toujours jouer le contrôle négatif.** Les deux vérifs de l'après-midi ne valaient que par leur témoin : les assets en `200` ne prouvaient rien tant que `/table` ne renvoyait pas `307`, et `"Object not found"` ne prouvait rien tant qu'un bucket bidon ne renvoyait pas `"Bucket not found"`. Sans le témoin, une auth entièrement cassée aurait produit le même résultat « tout vert ».
 - **Une note de session est datée, pas vraie.** « Recréer le bucket » traînait depuis la veille alors que le bucket existait. Sonder avant de faire agir Adrien.
 - **Une convergence n'est pas une preuve.** `og:url` correct ne montre pas que `NEXT_PUBLIC_SITE_URL` est lue : le repli donnait la même valeur. Distinguer ce qu'on observe de ce qu'on en déduit.
+
+---
+
+# 3e temps de la journée — Portraits animés (fiches + MJ)
+
+Poussé sur `origin/main` (`d2c4a34..ad0b3ed`, 4 commits) et déployé. Prod vérifiée.
+
+## Réalisé
+
+### Portraits animés sur les fiches (`d3a6360`, `2712dcd`)
+- **Blocker levé** : `docs/coltar.mp4` n'est plus en attente, le chantier « portraits animés » est fait pour les 4 personnages.
+- La vidéo se joue **une fois** à l'ouverture de la fiche, puis se fond vers le portrait fixe, qui reste l'état de repos. Même contrat que `LandingVideo` : **l'image est la couche de base**, la vidéo une amélioration posée par-dessus, toute dégradation retombe sur l'image sans code dédié.
+- **Deux fondus, de durées mesurées** :
+  - **ouverture, 300 ms.** Ces vidéos sont régénérées à partir du portrait fixe et en **dérivent toujours** (30 à 33 dB) : visage légèrement différent, éléments animés déplacés. Que ça se voie dépend du mouvement du clip. Chez Coltar l'écart (31,8 dB) était **plus faible** que le mouvement d'une image (28,1 dB) → invisible. Chez Lotus le clip était quasi immobile au départ (**48,1 dB** entre deux images) → le changement de visage aurait sauté aux yeux.
+  - **fin, 800 ms.** Les clips terminent loin de leur portrait (10 à 14 dB), souvent sur un gros plan où le personnage n'est plus reconnaissable. Sans fondu, la fiche resterait figée dessus.
+- **Association perso → vidéo en code** (`src/lib/animated-portraits.ts`), pas en base : versionnée avec la vidéo qu'elle désigne, sans migration ni champ de formulaire. Deviendra une colonne le jour où un non-dev devra en poser une.
+
+### Son sur demande stricte (`d3a6360`)
+- Piste audio **copiée sans réencodage** (AAC stéréo), +167 Ko par vidéo.
+- **L'ouverture est toujours muette**, quel que soit le navigateur. Une commande unique prend deux rôles : au repos elle relance avec le son, en lecture elle coupe/rétablit.
+- Arbitrage : l'autoplay sonore n'est autorisé qu'après un geste dans le document. Il **passerait** depuis `/table` (navigation `<Link>`, même document, le clic sur la carte compte) mais serait **refusé** sur lien direct, rafraîchissement ou retour d'historique. Le muet inconditionnel est le seul comportement prévisible — et évite qu'une fiche consultée autour d'une table fasse du bruit toute seule.
+
+### Visuel animé du MJ (`4e42ad3`)
+- `/mj` suit le même motif de hero, le composant s'y pose tel quel. Table de correspondance **distincte** car la clé l'est : `/mj` est piloté par la campagne (`main`), pas par un personnage.
+- **Défaut corrigé, présent depuis `d3a6360`** : les dégradés du hero sont posés **après** le bouton dans le DOM et interceptaient le pointeur. Le bouton restait **visible mais inerte** dès que le hero était assez court pour que le dégradé du bas remonte jusqu'à lui — cas de `/mj` (24/28 rem contre 26/30 rem pour une fiche). Réglé par `z-10`.
+- Les **vignettes de personnages de la grille `/mj` restent des images fixes** : plusieurs vidéos lues simultanément non traitées.
+
+### Nouvelle prise pour Lotus (`ad0b3ed`)
+- `docs/lotus2.mp4` encodée **par-dessus `public/portraits/lotus.mp4`** : le nom de fichier désigne le personnage, pas la prise.
+- Sans risque de cache, **vérifié** : Vercel sert les fichiers de `public/` en `max-age=0, must-revalidate` avec etag, donc revalidation à chaque requête.
+- Le nouveau clip bouge davantage au démarrage (référence 48,1 → 36,2 dB). Le fondu d'ouverture garde son utilité, mais Lotus n'est plus le cas qui l'avait rendu nécessaire.
+
+### Chaîne d'encodage retenue
+`H.264 CRF 28, preset slow, audio copié (-c:a copy), +faststart`, résolution native 716×1284 conservée.
+- **Pas d'`unsharp`**, contrairement à la chaîne de la landing : cette vidéo n'est **jamais agrandie** dans le créneau de fiche (au pire 0,97× sur mobile DPR 3). Le flou corrigé là-bas ne peut pas se produire ici.
+- **Un seul fichier**, pas de découpage desk/mobile : contre-intuitif après la landing, c'est le **mobile qui est exigeant** (1248 px physiques en DPR 3) et non le desktop (960 en DPR 2).
+- Qualité à l'échelle d'affichage réelle, pire image sur 241 : coltar 38,1 / elayne 37,6 / kezac 39,1 / lotus 38,3 / gamemaster 38,7 dB. **Monter le CRF double le poids sans gain visible** (mesuré : CRF 23 = 2 386 Ko, CRF 28 = 1 171 Ko, indiscernables à l'échelle réelle dans la zone la plus exposée au banding).
+- Poids : 13 Mo → 1,1 à 1,9 Mo par vidéo. **~7,8 Mo ajoutés à l'historique git, définitivement.**
+
+### Vérifs
+`tsc` + `next build` verts, **12/12 vitest** à chaque étape. Navigateur sur le **build de prod** : 5 surfaces × 2 formats, bonne vidéo par personnage (contrôlée **contre le nom affiché**, pas l'identifiant envoyé), muet à l'ouverture, fondu d'ouverture mesuré en vol (rampe 0 → 0,39 → 0,90 → 1 sur ~300 ms), fondu de fin à 0,8 s, **cliquabilité du bouton 10/10**, mouvement réduit = 0 octet, 0 erreur console.
+**En prod** : les 5 vidéos en `200`, identiques à l'octet près, servies sans cookie. Contrôle joué : `/table`, `/mj` et une fiche renvoient `307 → /?login=1`. Pas de troisième oubli du `matcher`.
+
+## Reste à faire
+- Repris de plus haut, toujours ouvert : **`AUTH_SECRET` sur Vercel** + redéploiement ; **limitation de tentatives sur `loginAppAction`** ; manifest PWA ; `autoComplete` sur la modale.
+- **Contrôle non fait, à faire par Adrien** : netteté sur téléphone réel et son au clic. Les mesures ne remplacent ni l'un ni l'autre — c'est sur téléphone que le flou de la landing était apparu.
+- Si le casting grandit : **basculer les vidéos vers le bucket Supabase** comme les portraits, plutôt que d'alourdir l'historique git.
+- Non traité, écarté par Adrien : **lecture en plein écran** au clic sur Play.
+- Non traité : **vignettes animées dans la grille `/mj`** (plusieurs vidéos simultanées).
+
+## Blockers
+- Aucun.
+
+## Décisions
+- **Portraits animés posés par un dev, en code.** Pas d'upload vidéo, pas de colonne en base tant que seul un dev en ajoute.
+- **Fondu d'ouverture uniforme plutôt qu'un réglage par vidéo.** Imperceptible quand les images sont proches, masquant quand elles divergent : supprime un cas particulier et une mesure à refaire à chaque ajout.
+- **Le son ne part jamais seul.** Choix d'Adrien contre le repli automatique. Rien ne fait de bruit sans un clic.
+- **Le nom de fichier désigne le personnage, pas la prise.** Une nouvelle version écrase la précédente au même chemin.
+- **Règle `.gitignore` élargie** de `/docs/landing*.mp4` à `/docs/*.mp4` : aucune source vidéo n'a vocation à être suivie, seule sa sortie l'est.
+- **Plein écran écarté.** Aurait agrandi la vidéo 1,4× à 2,0× selon l'appareil, contre 0,75×–0,97× aujourd'hui.
+
+## Leçons de méthode (pour les prochaines fois)
+- **Vérifier l'action réelle, pas son proxy.** Le bouton de son est resté **inerte sur `/mj` depuis le premier commit** parce que je contrôlais sa *position* (« ne chevauche pas le portrait ») et jamais sa *cliquabilité*. Découvert par accident, en essayant de cliquer. Un test qui mesure une coordonnée ne teste pas un usage.
+- **Ne pas généraliser depuis un seul cas favorable.** « Pas de fondu à l'ouverture » a été tranché sur Coltar seul ; Lotus l'a démenti. L'écart était comparable partout — ce qui changeait, c'est si le mouvement du clip le masquait.
+- **Un harnais de test peut rendre une vérification impossible sans le dire.** Le Chromium de Playwright tourne avec `--autoplay-policy=no-user-gesture-required` : mon test d'autoplay sonore renvoyait « autorisé » et ne pouvait structurellement rien détecter. Vérifié en lisant les arguments du process. Même famille que le piège de la vignette, hier.
+- **Attention aux mesures prises entre deux appels lents.** Deux captures « en cours de lecture » montraient en fait l'état de repos : le clip de 10 s s'était terminé entre mes commandes. Rendre l'opération atomique (`evaluate` unique qui attend l'événement) au lieu d'enchaîner des appels.
+- **Remettre en état une donnée touchée par un test.** J'ai incrémenté la fatigue de Coltar pour forcer un rendu React ; remise à 0 **et vérifiée en base**, pas seulement à l'écran.
+- **Corriger un commentaire devenu faux au même titre que du code.** « Vérifié sur les quatre vidéos » après en avoir ajouté une cinquième est une dette, pas un détail.
