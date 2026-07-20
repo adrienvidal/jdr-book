@@ -15,12 +15,17 @@ export default async function Home() {
   return (
     <main className="min-h-screen p-4 sm:p-8 md:p-10 max-w-5xl mx-auto">
       <header className="flex flex-wrap items-end justify-between gap-4 mb-6 sm:mb-8 border-b border-line pb-4 sm:pb-5">
-        <div>
-          <h1 className="font-cairn text-4xl sm:text-6xl leading-none">Cairn</h1>
+        {/* Le wordmark ramène à l'écran de démarrage (convention : le logo est
+            le lien d'accueil). La session est conservée — la landing détecte le
+            cookie et propose « Commencer » en retour direct. */}
+        <Link href="/" aria-label="Retour à l'écran d'accueil" className="group">
+          <h1 className="font-cairn text-4xl sm:text-6xl leading-none transition-colors group-hover:text-primary">
+            Cairn
+          </h1>
           <p className="text-muted-foreground mt-1 sm:mt-2 text-sm tracking-wide">
-            Compagnon de campagne
+            Carnet de campagne
           </p>
-        </div>
+        </Link>
         <Button asChild size="lg">
           <Link href="/character/new">
             <Plus /> Ajouter un personnage
