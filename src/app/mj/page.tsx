@@ -35,7 +35,7 @@ export default async function MjPage() {
   return (
     <main className="mx-auto min-h-screen max-w-5xl px-4 pb-10 sm:px-6">
       {/* Hero plein écran (comme la fiche perso), décliné MJ */}
-      <div className="relative left-1/2 right-1/2 -mx-[50vw] h-[24rem] w-screen overflow-hidden bg-ink sm:h-[28rem]">
+      <div className="relative left-1/2 right-1/2 -mx-[50vw] h-[26rem] w-screen overflow-hidden bg-ink sm:h-[30rem]">
         {/* Fond : portrait MJ adouci, remplit les bords */}
         <Image
           src={campaign.mjImageUrl || "/default-character.webp"}
