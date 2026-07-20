@@ -7,8 +7,10 @@ import { ArrowLeft, Minus, Plus, Trash2 } from "lucide-react";
 import type { Character, Item } from "@prisma/client";
 import { deleteCharacter, updateCharacter } from "@/app/actions/characters";
 import { uploadPortrait } from "@/app/actions/upload";
+import { AnimatedPortrait } from "@/components/AnimatedPortrait";
 import { InventoryEditor } from "@/components/InventoryEditor";
 import { PortraitUpload } from "@/components/PortraitUpload";
+import { ANIMATED_PORTRAITS } from "@/lib/animated-portraits";
 import { MAX_SLOTS } from "@/lib/inventory";
 import { useFieldSave } from "@/lib/use-field-save";
 import { cn } from "@/lib/utils";
@@ -95,6 +97,7 @@ function FatigueBar({
 export function CharacterSheet({ character }: { character: CharacterWithItems }) {
   const router = useRouter();
   const id = character.id;
+  const animatedSrc = ANIMATED_PORTRAITS[id];
   const [fatigue, setFatigue] = useState(character.fatigue);
   const [epuise, setEpuise] = useState(character.epuise);
 
@@ -163,17 +166,25 @@ export function CharacterSheet({ character }: { character: CharacterWithItems })
         />
         <div className="absolute inset-0 bg-black/15" />
 
-        {/* Portrait net, non rogné, centré */}
-        <div className="absolute inset-y-0 left-1/2 aspect-[9/16] -translate-x-1/2">
-          <Image
-            src={character.imageUrl || "/default-character.webp"}
+        {/* Portrait net, non rogné, centré — animé si ce personnage a une vidéo */}
+        {animatedSrc ? (
+          <AnimatedPortrait
+            videoSrc={animatedSrc}
+            imageUrl={character.imageUrl || "/default-character.webp"}
             alt={character.name}
-            fill
-            priority
-            sizes="(max-width: 640px) 60vw, 300px"
-            className="object-cover sepia-[.08]"
           />
-        </div>
+        ) : (
+          <div className="absolute inset-y-0 left-1/2 aspect-[9/16] -translate-x-1/2">
+            <Image
+              src={character.imageUrl || "/default-character.webp"}
+              alt={character.name}
+              fill
+              priority
+              sizes="(max-width: 640px) 60vw, 300px"
+              className="object-cover sepia-[.08]"
+            />
+          </div>
+        )}
 
         {/* Barre du haut : Accueil / Supprimer */}
         <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-black/55 to-transparent">

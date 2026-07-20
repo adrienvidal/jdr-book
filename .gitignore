@@ -44,7 +44,8 @@ next-env.d.ts
 # Playwright MCP test artifacts
 .playwright-mcp/
 
-# Sources d'art de la landing (les versions optimisées sont dans public/ :
-# WebP pour les images, MP4 rebouclé + compressé pour les vidéos)
+# Sources d'art (les versions optimisées sont dans public/ : WebP pour les
+# images, MP4 compressé pour les vidéos). Règle élargie à tout /docs/*.mp4 :
+# aucune source vidéo n'a vocation à être suivie, seule sa sortie l'est.
 /docs/landing*.png
-/docs/landing*.mp4
+/docs/*.mp4
