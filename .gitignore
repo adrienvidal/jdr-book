@@ -49,3 +49,6 @@ next-env.d.ts
 # aucune source vidéo n'a vocation à être suivie, seule sa sortie l'est.
 /docs/landing*.png
 /docs/*.mp4
+
+# HyperFrames video projects (marketing deliverables)
+/videos/
